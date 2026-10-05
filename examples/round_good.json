@@ -1,0 +1,83 @@
+{
+  "_note": "合规且通过全部闸门的一轮：G1–G9 准入 + F0–F6 前向体检全过 ⇒ adopt。注意 candidate 的主指标与风险都必须不劣于 baseline，且 n 必须已到 N*。",
+  "round_id": 7,
+  "candidate": {
+    "id": "BS-1-factor-weight",
+    "name": "因子两档权重 → 连续风险预算权重",
+    "family": "weighting",
+    "kind": "single_key",
+    "uses": ["ret20", "log_mv"],
+    "change": {"is_change": true, "target": "engine.py:weight()"}
+  },
+  "metrics": {
+    "baseline": {"ann": 0.100, "mdd": -0.300, "n": 480, "sharpe": 0.62},
+    "candidate": {"ann": 0.300, "mdd": -0.200, "n": 500, "sharpe": 2.00, "skew": 0.0, "kurt": 3.0},
+    "context": {
+      "anchors_ok": true,
+      "coverage": {"ret20": 96.2, "log_mv": 100.0},
+      "region": {"single_key": 6},
+      "removed_by_year": {"single_key": {"2023": 120, "2024": 110, "2025": 100}},
+      "base_by_year": {"2023": 160, "2024": 170, "2025": 170},
+      "no_lookahead": {"single_key": {"ann": 0.250}},
+      "trials": 3,
+      "ppy": 242
+    }
+  },
+  "fwd": {
+    "coverage": "full",
+    "panel_md5": "3fe4b466698bfe84be3a4be49e1f5258",
+    "caliber": {"adjust": "后复权", "asof": "D−1 收盘", "cost": "单边 3bp", "universe": "29 只场内 ETF"},
+    "n_obs": 500,
+    "mean": 0.0125,
+    "sd": 0.06,
+    "per_day_max_candidates": 5,
+    "rank_key_source": "train",
+    "is_change": true,
+    "diff_trades": {
+      "added": {"n": 60, "mean": 0.0318, "ci": [0.005, 0.0505], "p": 0.021},
+      "removed": {"n": 20, "mean": -0.0146, "ci": [-0.032, -0.001], "p": 0.038}
+    },
+    "loo": {"total": 30.0, "best_trade": 8.0, "ex_best": 12.0}
+  },
+  "proponent": {
+    "claims": [
+      {"claim": "机制：两档权重把因子暴露量化成阶梯，连续风险预算能按下行波动调仓；风险预算优于打分加权", "evidence": "E-x118 §3"}
+    ],
+    "failure_conditions": ["若 G6 连续优区 <4 格 ⇒ 承认为切点挑选", "若 F5 差异笔 CI 含 0 ⇒ 承认改动未被证明"],
+    "responded_tasks": ["T-6-1"],
+    "code_opt_points": [
+      {"id": "BS-7", "locus": "engine.py:weight()", "why_hardcoded": "持仓权重只有 {0.5, 1.0} 两档，从未进过搜索自由度"},
+      {"id": "BS-8", "locus": "engine.py:rebalance_calendar", "why_hardcoded": "再平衡日历写死为自然月，未测过固定相位以外的选项"}
+    ]
+  },
+  "adversary": {
+    "objections": [
+      {"objection": "候选的 mdd 改善是否只是低敞口的副产品", "prereg": "若 Calmar 未上移 ⇒ 是稀释而非改善"}
+    ],
+    "directions": [
+      {"direction": "逆波动加权替代两档权重", "mechanism": "风险预算优于打分加权",
+       "prereg": "Calmar ≥ 基线 + 0.1", "cost": "low", "priority": 1}
+    ],
+    "commissar_pack": {
+      "risk_register": [
+        {"risk": "收益集中在单一年份（2023 独扛）", "trigger": "影响集单年占比 > 50%",
+         "action": "分年拆解 + 留一笔复核，不合格则回退", "severity": "high"},
+        {"risk": "连续权重放大换手，整手约束下无法表达", "trigger": "单手金额 > 目标仓位",
+         "action": "加最小交易单位可行域检验，不做则降级 pending", "severity": "medium"}
+      ],
+      "opt_prescriptions": [
+        {"target": "engine.py:weight()", "action": "把 w∈{0.5,1.0} 换成 w = clamp(σ_target/σ_i, 0.2, 1.0)",
+         "mechanism": "风险预算：按下行波动反向给权重，等价于组合层波动率目标化",
+         "expected_delta": "Calmar +0.15，mdd 不劣化", "cost": "low", "priority": 1,
+         "rollback": "恢复 w∈{0.5,1.0} 并删掉 σ_target 常量"},
+        {"target": "engine.py:candidate_pool()", "action": "把候选集从「写死 top-30 成交额」改成按 name 去污后的动态池",
+         "mechanism": "关键词建池会混入非目标品种（期货/沪港深），去污后才是真赛道暴露",
+         "expected_delta": "读数下降但可复现（去污前/后双列报）", "cost": "medium", "priority": 2,
+         "rollback": "改用冻结池快照"}
+      ]
+    },
+    "unrefuted_focus": ["基线的 mdd 优势是否只是低敞口的副产品"]
+  },
+  "blueocean": {"dims": ["ETF 折溢价 / 份额流"]},
+  "config": {"metric_key": "ann", "risk_key": "mdd", "budget_left": 5, "max_rounds": 12}
+}

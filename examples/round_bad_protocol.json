@@ -1,0 +1,51 @@
+{
+  "_note": "故意违规的反例：① 反方只给方向不给处方（P6 违规）；② 正方主张无证据 ID（P3 违规）；③ 选优键用了留出段（P8 作弊键）。引擎必须判 invalid 并拒绝计入台账。",
+  "round_id": 9,
+  "candidate": {
+    "id": "BS-3-bad-protocol",
+    "name": "标题很漂亮的候选",
+    "family": "weighting",
+    "kind": "single_key",
+    "uses": ["ret20"],
+    "change": {"is_change": true}
+  },
+  "metrics": {
+    "baseline": {"ann": 0.10, "mdd": -0.30},
+    "candidate": {"ann": 0.05, "mdd": -0.25, "n": 900, "sharpe": 1.1},
+    "context": {
+      "anchors_ok": true,
+      "coverage": {"ret20": 95.0},
+      "region": {"single_key": 1},
+      "removed_by_year": {"single_key": {"2023": 5}},
+      "base_by_year": {"2023": 5},
+      "no_lookahead": {"single_key": {"ann": 0.04}},
+      "trials": 5
+    }
+  },
+  "fwd": {
+    "coverage": "full",
+    "panel_md5": "deadbeef",
+    "caliber": {"adjust": "后复权", "asof": "D−1 收盘", "cost": "单边 3bp", "universe": "29 只 ETF"},
+    "n_obs": 900,
+    "mean": 0.02,
+    "sd": 0.08,
+    "per_day_max_candidates": 8,
+    "rank_key_source": "holdout",
+    "is_change": false
+  },
+  "proponent": {
+    "claims": [
+      {"claim": "这个因子肯定有效，不用给证据"}
+    ],
+    "code_opt_points": []
+  },
+  "adversary": {
+    "objections": [
+      {"objection": "我觉得不行", "prereg": "感觉会亏"}
+    ],
+    "directions": [
+      {"direction": "再调一下参数试试", "mechanism": "无", "prereg": "无", "priority": 1}
+    ]
+  },
+  "config": {"metric_key": "ann", "risk_key": "mdd", "budget_left": 3, "max_rounds": 12}
+}

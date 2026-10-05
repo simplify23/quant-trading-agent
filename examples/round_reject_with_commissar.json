@@ -1,0 +1,82 @@
+{
+  "_note": "合规的「驳回」轮：硬闸不过 + 样本已到 N* ⇒ reject；反方交付完整政委包（风险登记 + 优化处方四件套）。",
+  "round_id": 8,
+  "candidate": {
+    "id": "BS-2-open-break-exit",
+    "name": "开板日改尾盘卖出",
+    "family": "exit_rule",
+    "kind": "exit",
+    "uses": ["close", "limit_up_flag"],
+    "change": {"is_change": true, "target": "engine.py:exit_schedule()"}
+  },
+  "metrics": {
+    "baseline": {"ann": 0.346, "mdd": -0.195, "n": 31, "sharpe": 1.77},
+    "candidate": {"ann": 0.281, "mdd": -0.212, "n": 900, "sharpe": 1.55},
+    "context": {
+      "anchors_ok": true,
+      "coverage": {"close": 100.0, "limit_up_flag": 99.1},
+      "region": {"exit": 2},
+      "removed_by_year": {"exit": {"2023": 9, "2024": 0, "2025": 0}},
+      "base_by_year": {"2023": 9, "2024": 12, "2025": 10},
+      "no_lookahead": {"exit": {"ann": 0.26}},
+      "trials": 120,
+      "ppy": 242
+    }
+  },
+  "fwd": {
+    "coverage": "full",
+    "panel_md5": "3fe4b466698bfe84be3a4be49e1f5258",
+    "caliber": {"adjust": "后复权", "asof": "D−1 收盘", "cost": "单边 3bp", "universe": "29 只场内 ETF"},
+    "n_obs": 900,
+    "mean": 0.02,
+    "sd": 0.08,
+    "per_day_max_candidates": 10,
+    "rank_key_source": "train",
+    "is_change": true,
+    "diff_trades": {
+      "added": {"n": 21, "mean": -0.0146, "ci": [-0.030, -0.002], "p": 0.031},
+      "removed": {"n": 22, "mean": 0.0483, "ci": [0.011, 0.083], "p": 0.008}
+    },
+    "loo": {"total": 28.1, "best_trade": 31.0, "ex_best": -8.5}
+  },
+  "proponent": {
+    "claims": [
+      {"claim": "开板日尾盘卖能吃到当日回封，训练段单笔 +0.08% → +3.17%", "evidence": "E-lab-7"}
+    ],
+    "failure_conditions": ["留出段反向即撤回"],
+    "responded_tasks": ["T-8-1"],
+    "code_opt_points": [
+      {"id": "BS-9", "locus": "engine.py:exit_schedule()", "why_hardcoded": "卖出时点只有「开板价/收盘价」两档，未进过自由度"}
+    ]
+  },
+  "adversary": {
+    "objections": [
+      {"objection": "训练段巨大优化在留出段反向（+5.25% → +3.47%）", "prereg": "若两段异号 ⇒ 判噪声"},
+      {"objection": "剔掉最好一笔后翻负 ⇒ 单笔独扛", "prereg": "若 ex_best ≤ 0 ⇒ 结论不成立"}
+    ],
+    "directions": [
+      {"direction": "把卖出时点参数化成「开板后 k 分钟」连续档", "mechanism": "现在只有两档，是硬编码盲区",
+       "prereg": "存在 ≥4 格连续正向区间", "cost": "medium", "priority": 1}
+    ],
+    "commissar_pack": {
+      "risk_register": [
+        {"risk": "规则改善 100% 落在单一年份", "trigger": "分年拆解差异集中在一年",
+         "action": "判数据可用性伪影，禁止宣称有效", "severity": "high"},
+        {"risk": "剔最好一笔后翻负", "trigger": "leave-one-trade-out ex_best ≤ 0",
+         "action": "标注单事件独扛，不得当规律", "severity": "high"}
+      ],
+      "opt_prescriptions": [
+        {"target": "engine.py:exit_schedule()", "action": "把 open_break_exit 的布尔开关换成 09:30 起每 30 分钟一档的连续卖出时刻表，跑密集网格",
+         "mechanism": "单点开关只能产生孤立尖峰；连续档才能看出参数平台",
+         "expected_delta": "若存在连续双正区间则 Calmar +0.1，否则确认是噪声", "cost": "medium",
+         "priority": 1, "rollback": "恢复布尔开关并保留原 open_break_exit 分支"},
+        {"target": "engine.py:gate_state()", "action": "把 insufficient:\"block\" 切成 pass 各跑一遍，差值即纯伪影",
+         "mechanism": "冷启动语义会让早期年份被整段拦掉，凭空造出漂亮历史",
+         "expected_delta": "差值应为 0；不为 0 ⇒ 之前的「改善」是伪影", "cost": "low",
+         "priority": 2, "rollback": "恢复 insufficient:\"block\""}
+      ]
+    },
+    "unrefuted_focus": ["正方主张的「回封机制」是否在留出段也存在"]
+  },
+  "config": {"metric_key": "ann", "risk_key": "mdd", "budget_left": 4, "max_rounds": 12}
+}
