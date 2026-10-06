@@ -80,7 +80,7 @@ quant-trading-agent/
 │   ├── rubric.md                G1–G11 + F0–F6 + D0–D4 判据、阈值清单、N*/DSR/PBO/SPA 公式与局限
 │   ├── forward-first.md         前向优先手册：六道闸门 + 18 个踩坑 + 十一条不许
 │   ├── preflight-audit.md       ★上线前代码审计：规则表 + 自动化查不到什么 + 上线前必答清单
-│   └── precedent.md             先例案卷 P-01…P-33（接入新项目前先对表）
+│   └── precedent.md             先例案卷 P-01…P-38（接入新项目前先对表）
 ├── scripts/
 │   ├── qta_loop.py              主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
 │   ├── preflight_audit.py       ★代码审计器（P0/P1/P2 + 代码指纹 + .preflightignore）

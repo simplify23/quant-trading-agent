@@ -2,7 +2,7 @@
 name: quant-trading-agent
 display_name: 量化交易Agent策略框架
 display_name_en: Quant Trading Agent Framework (Triad Loop × Forward-First Audit × Preflight)
-version: 2.2.0
+version: 2.2.1
 author: simplify23
 description: 量化交易 Agent 策略框架 v2.1 —— 把「三方闭环迭代」「前向优先反自欺审计」「上线前代码审计」合成一条可执行流水线。正方（探索 / 代码优化实现者）· 反方（政委：风险登记 + 优化处方四件套）· 中立裁判（独立取证 + G1–G9/F0–F6/D0–D4 逐条裁定 + 派工 + ★催办正方去做代码优化）。当用户说「跑一轮三方」「三方裁决」「让框架推进迭代」「催正方去改代码」「反方给优化处方」「策略该不该采纳并继续深挖」「这个结论凭什么算数」「我能测出来吗」「研究收敛了吗」「还能不能再优化」「已证伪的有哪些」「哪些结论经得起实盘」时使用；也用于「上线/实盘/影子盘前审一下代码有没有 bug」「这份代码能不能接钱」「审计一下会不会重复下单/写坏台账」。
 description_en: A triad closed-loop research framework for quantitative strategies — proponent (exploration / code-level optimization) × adversary (risk register + executable optimization prescriptions) × neutral judge (independent re-runs + G1–G9 admission gates, F0–F6 forward-first anti-self-deception audit, D0–D4 pre-deployment code audit with a SHA256 code fingerprint that binds the audit to the exact build). Use it for "run a triad round", "should we adopt this strategy", "is this backtest conclusion trustworthy", "can this effect even be detected" (N* sample-size arithmetic, moving-block CI, diff-trade audit, leave-one-out), "audit this code before going live or paper trading", "which conclusions were already falsified". Enforces — no adoption before sample size reaches N*; "not detected" is never reported as "invalid"; the adversary must deliver executable prescriptions, not just objections; the judge must coach the proponent until code-level optimizations actually land; passing an audit is not the same as being bug-free.
@@ -169,7 +169,7 @@ $PY $D/scripts/preflight_audit.py --mode live --targets <代码路径…> \
 - `references/rubric.md` G1–G9 + F0–F6 + D0–D4 判据、阈值、DSR/N\* 公式与已知局限
 - `references/forward-first.md` 前向优先手册（六道闸门 + 18 个踩坑 + 十一条不许）
 - `references/preflight-audit.md` ★上线前代码审计：规则表 + **自动化查不到什么** + 上线前必答清单
-- `references/precedent.md` 先例案卷 P-01…P-33（接入新项目前先对表）
+- `references/precedent.md` 先例案卷 P-01…P-38（接入新项目前先对表）
 - `scripts/qta_loop.py` 主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
 - `scripts/preflight_audit.py` ★代码审计器（静态扫描 P0/P1/P2 + 代码指纹 + `.preflightignore`）
 - `scripts/overfit_metrics.py` ★多重检验度量（**PBO / CSCV + Hansen SPA**，纯标准库，白噪声校准）
