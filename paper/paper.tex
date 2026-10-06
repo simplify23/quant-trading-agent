@@ -23,6 +23,9 @@
 \usepackage{booktabs}
 \usepackage{fancyvrb}
 \usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
 \usepackage{array}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
@@ -114,6 +117,14 @@ conservative.'' Our contributions:
 \item Honest negatives: a redundant sample-size criterion, failed control designs, and a task
       morphology in which gates are unhelpful (\S\ref{sec:ablation}--\ref{sec:morphology}).
 \end{enumerate}
+
+\paragraph{Why it matters.} Every automated research pipeline that admits conclusions must
+decide \emph{when to stop believing its own output}. Gates are the instrument that decision rests
+on, yet their effectiveness is typically assumed rather than measured---and the one published
+calibration of such an instrument reported a null forward result \citep{minerva}. If gates are
+weaker than assumed, the pipelines that rely on them inherit an unbounded false-discovery risk;
+if they are merely conservative, those pipelines silently discard real findings. Neither failure
+is visible from the outside, which is what makes the question worth measuring.
 
 We do not claim that gates increase returns, nor that our implementation improves on prior work.
 
@@ -287,6 +298,40 @@ its adoption rate is identically one and cannot be aligned. A valid control must
 \section{Experimental Setup}
 \label{sec:setup}
 
+\begin{figure}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt, minimum height=8mm},
+  arm/.style={draw, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm, fill=black!4},
+  ar/.style={-{Latex[length=2mm]}, thick}]
+\node[box] (real) at (0,0) {Real panel\\29 ETFs, 745 days};
+\node[box, right=9mm of real] (inj) {Inject known $\alpha$\\into $K$ of $N$ candidates};
+\node[box, right=9mm of inj] (truth) {Ground truth\\observable};
+\draw[ar] (real) -- (inj);  \draw[ar] (inj) -- (truth);
+\node[box, below=6mm of real, text width=26mm] (p1) {Panel I\\synthetic\\independent};
+\node[box, below=6mm of inj, text width=26mm] (p2) {Panel II\\real-calibrated\\strategy family};
+\node[box, below=6mm of truth, text width=26mm] (p3) {Panel III\\real cross-section\\(counter-example)};
+\draw[ar] (real.south) -- (p1.north);  \draw[ar] (inj.south) -- (p2.north);  \draw[ar] (truth.south) -- (p3.north);
+\node[arm, right=14mm of truth, yshift=8mm, text width=34mm] (a) {\textbf{A} pure search\\highest training Sharpe};
+\node[arm, below=3mm of a, text width=34mm] (b) {\textbf{B} gate\\adopt best passer, else abstain};
+\node[arm, below=3mm of b, text width=34mm] (c) {\textbf{C} random admission\\same rate, coin flip};
+\draw[ar] ([yshift=4mm]truth.east) -- (a.west);
+\node[box, right=8mm of b, text width=30mm, fill=black!8] (cmp) {Compare\\$\Delta\text{FDR}=\text{FDR}_C-\text{FDR}_B$};
+\draw[ar] (a.east) -- (a.east -| cmp.west);
+\draw[ar] (b.east) -- (cmp.west);
+\draw[ar] (c.east) -- (c.east -| cmp.west);
+\end{tikzpicture}}
+\caption{The injected-truth protocol. Ground truth is injected rather than assumed, which makes
+false discovery rate directly measurable. Arm~C adopts at the \emph{same rate} as arm~B but by
+coin flip; only if $\Delta\text{FDR}>0$ does the gate carry information rather than merely being
+more conservative.}
+\label{fig:protocol}
+\end{figure}
+
+Figure~\ref{fig:protocol} summarises the protocol.
+
 \subsection{Data and power pre-check}
 
 We use a panel of 29 A-share ETFs (745 return points, backward-adjusted); Table~\ref{tab:data}
@@ -356,7 +401,35 @@ $80.6\%$ & 5.74 & 0.000 & 1.000 & 0.000 & 0.000 & $+0.000$ & \emph{indistinguish
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:exp1} reports the outcome. In the weak regime pure search's FDR is
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.68\textwidth, height=0.40\textwidth,
+  xlabel={Training-period $t$ of the ground-truth signal},
+  ylabel={False discovery rate (FDR)},
+  xmin=0.3, xmax=6.2, ymin=-0.04, ymax=1.08,
+  legend pos=north east, legend cell align=left,
+  grid=both, grid style={line width=.2pt, draw=black!12},
+  tick label style={font=\small}, label style={font=\small}, legend style={font=\small}]
+\addplot[mark=*, thick, black] coordinates {(0.72,0.590) (1.44,0.243) (2.87,0.010) (5.74,0.000)};
+\addlegendentry{A: pure search}
+\addplot[mark=square*, thick, black] coordinates {(0.72,0.400) (1.44,0.000) (2.87,0.000) (5.74,0.000)};
+\addlegendentry{B: gate}
+\addplot[mark=triangle*, dashed, black] coordinates {(0.72,1.000) (1.44,0.200) (2.87,0.010) (5.74,0.000)};
+\addlegendentry{C: random admission (equal rate)}
+\draw[dotted, thick, black!55] (axis cs:2.5,-0.04) -- (axis cs:2.5,1.08);
+\node[font=\scriptsize, anchor=south west, black!70, align=left, text width=20mm] at (axis cs:2.6,0.02) {gate adds nothing beyond here};
+\end{axis}
+\end{tikzpicture}
+\caption{Panel~I (400 repetitions). Pure search errs on $24\%$--$59\%$ of weak-signal adoptions;
+the gate drives FDR to zero but only below $t\approx2.5$. To the right of the dotted line the
+gate is pure overhead: pure search barely errs and gating only lowers the adoption rate
+(Table~\ref{tab:exp1}).}
+\label{fig:fdr}
+\end{figure}
+
+Figure~\ref{fig:fdr} plots the same result as a curve:  In the weak regime pure search's FDR is
 $24\%$--$59\%$; gates reduce it to zero at the cost of an adoption rate of $1.7\%$--$4.7\%$. For
 training $t>2.5$, pure search already errs essentially never (FDR $\le1\%$) and gates add no
 value while lowering the adoption rate.
@@ -396,10 +469,36 @@ direction of the result.
 \label{sec:diag}
 
 Before the correction of Section~\ref{sec:excess}, arm B abstained $100\%$ of the time even at
-$t=4.0$. Table~\ref{tab:diag} gives per-criterion rejection rates for ground-truth columns and
+$t=4.0$. Figure~\ref{fig:reject} and Table~\ref{tab:diag} give per-criterion rejection rates for ground-truth columns and
 identifies the cause: under absolute returns the market component dominates total volatility and
 compresses the effective $t$-statistic by roughly a factor of three, so the DSR never passes.
 After the correction, arm B at $t=4.0$ attains a hit rate of $98.3\%$ while keeping FDR at zero.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.66\textwidth, height=0.38\textwidth,
+  ybar, bar width=4pt,
+  xlabel={Criterion}, ylabel={Rejection rate on ground-truth columns},
+  symbolic x coords={G6, F6, F1, G9a}, xtick=data,
+  ymin=0, ymax=1.12, legend pos=south west, legend cell align=left,
+  grid=major, grid style={line width=.2pt, draw=black!12},
+  tick label style={font=\small}, label style={font=\small}, legend style={font=\scriptsize}]
+\addplot[fill=black!15, draw=black] coordinates {(G6,1.00) (F6,1.00) (F1,1.00) (G9a,1.00)};
+\addlegendentry{$t=1.00$}
+\addplot[fill=black!40, draw=black] coordinates {(G6,0.60) (F6,0.60) (F1,1.00) (G9a,1.00)};
+\addlegendentry{$t=2.51$}
+\addplot[fill=black!70, draw=black] coordinates {(G6,0.40) (F6,0.20) (F1,0.80) (G9a,1.00)};
+\addlegendentry{$t=4.00$}
+\end{axis}
+\end{tikzpicture}
+\caption{Per-criterion rejection rate on \emph{ground-truth} columns before the excess-return
+correction. The DSR rejects a true signal $100\%$ of the time at every strength: under absolute
+returns the market component inflates volatility and compresses the effective $t$-statistic by
+roughly a factor of three.}
+\label{fig:reject}
+\end{figure}
 
 \begin{table}[htbp]
 \centering
