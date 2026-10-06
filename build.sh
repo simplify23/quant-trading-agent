@@ -11,20 +11,23 @@ REL=release
 VER=$(cat VERSION)
 mkdir -p "$REL"
 
-echo "== 1/7 引擎自检（三方闭环 + 前向体检 + 部署审计 + 催办） =="
+echo "== 1/8 引擎自检（三方闭环 + 前向体检 + 部署审计 + 催办） =="
 "$PY" scripts/qta_loop.py --selftest || { echo "❌ qta_loop selftest 未通过"; exit 1; }
 
-echo "== 2/7 代码审计器自检（规则命中 + ★误报闸） =="
+echo "== 2/8 代码审计器自检（规则命中 + ★误报闸） =="
 "$PY" scripts/preflight_audit.py --selftest || { echo "❌ preflight_audit selftest 未通过"; exit 1; }
 
-echo "== 3/7 因子层自检（需 numpy+pandas；缺失则跳过并明确标注） =="
+echo "== 3/8 度量层自检（PBO / SPA 白噪声校准 + 方向性） =="
+"$PY" scripts/overfit_metrics.py --selftest || { echo "❌ overfit_metrics selftest 未通过"; exit 1; }
+
+echo "== 4/8 因子层自检（需 numpy+pandas；缺失则跳过并明确标注） =="
 if "$PY" -c "import numpy, pandas" 2>/dev/null; then
   "$PY" scripts/fps_factor.py --selftest || { echo "❌ fps_factor selftest 未通过"; exit 1; }
 else
   echo "  ⚠️ 跳过：当前解释器缺 numpy/pandas（不算通过，只是未测）"
 fi
 
-echo "== 4/7 三类示例轮次必须给出预期判决 =="
+echo "== 5/8 三类示例轮次必须给出预期判决 =="
 "$PY" scripts/qta_loop.py --round examples/round_good.json --ledger "$REL/_t.jsonl" --out "$REL/_v_good.json"
 "$PY" scripts/qta_loop.py --round examples/round_reject_with_commissar.json --ledger "$REL/_t.jsonl" --out "$REL/_v_rej.json"
 "$PY" scripts/qta_loop.py --round examples/round_bad_protocol.json --ledger "$REL/_t.jsonl" --out "$REL/_v_bad.json"
@@ -39,7 +42,7 @@ assert json.load(open("release/_v_good.json"))["next_round"]["proponent_tasks"],
 print("  ✅ adopt / reject / invalid 三态齐；adopt 带派工")
 EOF
 
-echo "== 5/7 端到端部署审计：真实跑一遍 D0–D4，并验证「审完又改」会被抓 =="
+echo "== 6/8 端到端部署审计：真实跑一遍 D0–D4，并验证「审完又改」会被抓 =="
 "$PY" scripts/preflight_audit.py --mode live --targets scripts \
     --rollback-point "selftest" --out-dir "$REL/_pf" >/dev/null
 "$PY" - <<'EOF'
@@ -65,7 +68,7 @@ with tempfile.TemporaryDirectory() as td:
 print("  ✅ 部署审计 D0–D4 全过 ⇒ adopt；裁判重算指纹与报告一致")
 EOF
 
-echo "== 6/7 脱敏扫描：包内不得出现本机路径 / 凭据 / 账户信息 =="
+echo "== 7/8 脱敏扫描：包内不得出现本机路径 / 凭据 / 账户信息 =="
 # 公开分发标准（比自用严）：.py/.md/.json 里【任何】本机路径都算泄漏 ——
 # 陌生人机器上并不存在该路径（文档照抄会跑不起来），同时暴露使用者身份。
 # build.sh 自身是扫描规则的载体，故显式排除；--include 也不含 .sh。
@@ -79,7 +82,7 @@ if [ -n "$LEAK" ]; then
 fi
 echo "  ✅ 无本机路径、无凭据、无账户信息"
 
-echo "== 7/7 打包 + 解包复验 =="
+echo "== 8/8 打包 + 解包复验 =="
 STAMP=$(date +%Y%m%d)
 ZIP="$REL/quant-trading-agent-v$VER-$STAMP.zip"
 rm -f "$ZIP"
@@ -91,7 +94,7 @@ names = z.namelist()
 need = ["SKILL.md", "README.md", "VERSION",
         "references/roles.md", "references/protocol.md", "references/rubric.md",
         "references/forward-first.md", "references/preflight-audit.md", "references/precedent.md",
-        "scripts/qta_loop.py", "scripts/preflight_audit.py", "scripts/fps_factor.py",
+        "scripts/qta_loop.py", "scripts/preflight_audit.py", "scripts/overfit_metrics.py", "scripts/fps_factor.py",
         "scripts/selftest_all.py", "scripts/fixtures/selftest_bad.py",
         "examples/round_good.json"]
 miss = [n for n in need if n not in names]

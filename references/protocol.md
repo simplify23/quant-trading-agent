@@ -11,7 +11,8 @@
     "family": "weighting",                       // 同族候选共享 family，跨轮族级计数用
     "kind": "single_key",                        // 与 metrics.context 各分册的键对齐
     "uses": ["ret20", "log_mv"],                 // G5 只查这些变量的覆盖率
-    "change": {"is_change": true, "target": "engine.py:weight()"}
+    "change": {"is_change": true, "target": "engine.py:weight()",
+               "actual_files": ["engine.py", "risk.py"]}   // ★P9：改动指向 + 实际改动文件（对不上 ⇒ invalid）
   },
   "metrics": {
     "baseline":  {"ann": 0.100, "mdd": -0.300, "n": 480, "sharpe": 0.62},
@@ -24,8 +25,12 @@
       "removed_by_year": {"single_key": {"2023": 120, "2024": 110, "2025": 100}},
       "base_by_year":    {"2023": 160, "2024": 170, "2025": 170},
       "no_lookahead":    {"single_key": {"ann": 0.250}},   // G8 阈值只用 ≤t 信息重算
-      "trials": 3,                               // G9 台账累计训练段候选数（★含被你忘掉的那些）
-      "ppy": 242                                 // 年化周期（A股242 / 美股252 / BTC365）
+      "trials": 3,                               // G9a 台账累计训练段候选数（★含被你忘掉的那些）
+      "ppy": 242,                                // 年化周期（A股242 / 美股252 / BTC365）
+      "pbo": 0.31,                               // G9b 过拟合概率（overfit_metrics.py --pbo）★软闸
+      "spa_p": 0.012,                            // G9c Hansen SPA p 值（overfit_metrics.py --spa）
+      "novelty": {"max_rho": 0.22, "against": ["BS-3", "BS-7"]},   // G10 与已采纳结论集的相关性
+      "panel_ic": {"ic": 0.031, "t_adj": 3.1, "ir": 0.62, "n_days": 322}  // G11 面板级截面 IC
     }
   },
   "fwd": {                                       // ★ v2.0 新增：前向优先体检段（缺 ⇒ 判决封顶 pending）

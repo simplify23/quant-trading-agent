@@ -54,8 +54,16 @@ DSR_MIN = 0.95          # G9 DSR 判据
 NAG_HOLD = 2            # 正方连续未响应 ≥2 轮 ⇒ 停工清偿（不再受理新候选）
 NAG_STOP = 3            # 正方连续未响应 ≥3 轮 ⇒ 终止迭代（作业面失效）
 MIN_REPEAT_N = 30       # μ≤0 时判「有证据反对」所需最少笔数（防两笔为负就判死）
+# ---- v2.2 新增（A3/A6/A1 三项度量升级）----
+PBO_MAX = 0.5           # G9b：过拟合概率上限。★ 实测单次 PBO 的 sd≈0.26 ⇒ 只作辅助诊断，作【软闸】
+SPA_ALPHA = 0.05        # G9c：Hansen SPA 显著性（族内最优是否真优于基准）
+MAX_RHO_NOVELTY = 0.5   # G10：候选与「已采纳结论集」的最大可接受 |ρ|（超过 ⇒ 非新增量）
+IC_TMIN = 2.0           # G11：截面 IC 的 t_adj 强阈值（≥2 强 / 1~2 弱 / <1 不可判定）
+IC_TWEAK = 1.0
 
-HARD_GATES = ("G1_anchors", "G2_metric", "G3_risk", "G4_n", "G8_nolookahead", "G9_DSR")
+HARD_GATES = ("G1_anchors", "G2_metric", "G3_risk", "G4_n", "G8_nolookahead", "G9a_DSR")
+SOFT_GATES = ("G5_coverage", "G6_region", "G7_multiyear",
+              "G9b_PBO", "G9c_SPA", "G10_novelty", "G11_panel_ic")
 F_LABELS = ("F0_provenance", "F1_nstar", "F2_choice_freedom",
             "F3_forward_key", "F5_diff_trades", "F6_loo")
 D_LABELS = ("D0_report_present", "D1_code_fingerprint", "D2_no_blocker",
@@ -219,21 +227,67 @@ def run_gates(cand: dict, m: dict, cfg: dict) -> dict:
     g["G8_nolookahead"] = {"pass": (nlv is not None and bv is not None and nlv > bv),
                            "detail": f"无前视口径 {mk}={nla.get(mk)} 仍优于基线 {base.get(mk)}"}
 
+    # ---- G9a DSR（硬闸：试错次数折减）----
     trials = _num(ctx.get("trials")) or 0
     sr = _num(candm.get("sharpe"))
     if trials >= 2 and sr is not None and n_i > 0:
         ppy = int(_num(ctx.get("ppy")) or 252)
         sr0 = expected_max_sharpe(int(trials), n_i, ppy)
         if sr0 is None:
-            g["G9_DSR"] = {"pass": False,
-                           "detail": f"SR0 不可算（trials={int(trials)} 或 n={n_i} 过小）⇒ DSR 不可判，视为未过"}
+            g["G9a_DSR"] = {"pass": False,
+                            "detail": f"SR0 不可算（trials={int(trials)} 或 n={n_i} 过小）⇒ DSR 不可判，视为未过"}
         else:
             p = dsr_prob(sr, sr0, n_i, ppy,
                          _num(candm.get("skew")) or 0.0, _num(candm.get("kurt")) or 3.0)
-            g["G9_DSR"] = {"pass": p >= DSR_MIN,
-                           "detail": f"DSR={p:.4f} ≥{DSR_MIN}（SR0年化={sr0:.2f}，trials={int(trials)}，n={n_i}）"}
+            g["G9a_DSR"] = {"pass": p >= DSR_MIN,
+                            "detail": f"DSR={p:.4f} ≥{DSR_MIN}（SR0年化={sr0:.2f}，trials={int(trials)}，n={n_i}）"}
     else:
-        g["G9_DSR"] = {"pass": False, "detail": "trials/sharpe/n 缺失 ⇒ DSR 不可判，视为未过"}
+        g["G9a_DSR"] = {"pass": False, "detail": "trials/sharpe/n 缺失 ⇒ DSR 不可判，视为未过"}
+
+    # ---- G9b PBO（软闸：★ 噪声带极宽，只作辅助诊断，绝不单独否决）----
+    pbo = _num(ctx.get("pbo"))
+    if pbo is None:
+        g["G9b_PBO"] = {"pass": None, "skipped": True,
+                        "detail": "未提供 PBO（用 scripts/overfit_metrics.py --pbo 计算）"}
+    else:
+        g["G9b_PBO"] = {"pass": pbo <= PBO_MAX,
+                        "detail": f"PBO={pbo:.3f} ≤ {PBO_MAX}"
+                                  f"（★实测单次 sd≈0.26 ⇒ 仅作辅助诊断，不作否决依据）"}
+
+    # ---- G9c SPA（软闸：族内最优是否真优于基准）----
+    spa = _num(ctx.get("spa_p"))
+    if spa is None:
+        g["G9c_SPA"] = {"pass": None, "skipped": True,
+                        "detail": "未提供 SPA p 值（用 scripts/overfit_metrics.py --spa 计算）"}
+    else:
+        g["G9c_SPA"] = {"pass": spa <= SPA_ALPHA,
+                        "detail": f"SPA p={spa:.4f} ≤ {SPA_ALPHA}（Hansen 2005，族内最优优于基准）"}
+
+    # ---- G10 新增量：与「已采纳结论集」的相关性（A1 · FactorMiner 的去重闸）----
+    nov = ctx.get("novelty") or {}
+    mr = _num(nov.get("max_rho"))
+    if mr is None:
+        g["G10_novelty"] = {"pass": None, "skipped": True,
+                            "detail": "未提供 novelty.max_rho ⇒ 无法确认是否【新增量】"}
+    else:
+        g["G10_novelty"] = {"pass": mr <= MAX_RHO_NOVELTY,
+                            "detail": f"与已采纳结论集最大 |ρ|={mr:.3f} ≤ {MAX_RHO_NOVELTY}"
+                                      f"（against={nov.get('against')}）"}
+
+    # ---- G11 面板级 IC（A6 · 文献通用语言；样本效率比逐笔高一个量级）----
+    pic = ctx.get("panel_ic") or {}
+    t_adj = _num(pic.get("t_adj"))
+    if t_adj is None:
+        g["G11_panel_ic"] = {"pass": None, "skipped": True,
+                             "detail": "未提供 panel_ic.t_adj（按日聚类后再除 √h 的 t 值）"}
+    else:
+        weak = IC_TWEAK <= t_adj < IC_TMIN
+        g["G11_panel_ic"] = {
+            "pass": t_adj >= IC_TMIN,
+            "detail": f"截面 IC t_adj={t_adj:.2f}（IC={pic.get('ic')}，IR={pic.get('ir')}，"
+                      f"n_days={pic.get('n_days')}）"
+                      + ("；≥2 强" if t_adj >= IC_TMIN
+                         else ("；1~2 弱（不足以单独支撑采纳）" if weak else "；<1 不可判定"))}
     return g
 
 
@@ -464,7 +518,21 @@ def protocol_checks(rnd: dict, gates: dict, fg: dict, info: dict, nag: int) -> t
         if not o.get("prereg"):
             v.append("P3: 反方反对缺预注册预期")
 
-    non_adopt = not (gates and all(g["pass"] for g in gates.values()))
+    non_adopt = not would_adopt(gates, fg, info)
+
+    # ★ P9：claim ↔ diff 绑定（A2 · 借 AlphaAgent 的「假设-实现一致性」，防「说改 A 实际改 B」）
+    ch = (rnd.get("candidate") or {}).get("change") or {}
+    if ch.get("is_change"):
+        target = str(ch.get("target") or "").strip()
+        if not target:
+            v.append("P9: 改动型候选必须声明 change.target（改动的文件:函数），"
+                     "否则无法核对「主张」与「实际改动」是否一致")
+        else:
+            actual = [str(x) for x in (ch.get("actual_files") or [])]
+            if actual:
+                fname = target.split(":")[0].strip()
+                if fname and not any(fname in a for a in actual):
+                    v.append(f"P9: 声明改动 {target}，但实际改动文件为 {actual} ⇒ 主张与实现不符")
 
     # P1 反方优化方向
     if non_adopt and not (adv.get("directions") or []):
@@ -694,12 +762,32 @@ def nag_state(ledger: list, rnd: dict, no_nag: bool = False) -> tuple[int, list]
 
 
 # ---------------------------------------------------------------- 主裁决
+def would_adopt(gates: dict, fg: dict, info: dict) -> bool:
+    """adopt 的必要条件（不含 deploy 维度与协议违规）。
+
+    ★ 与 decide() **共用同一判定**，防止两处漂移（先例 P-13：两份同义实现 = 最危险的 bug）。
+    ★ 关键语义：`pass is None`（不适用/未提供）**既不算过也不算不过** ——
+      只有明确的 `False` 才阻断 adopt；而未经前向体检（fg 全 skip）则封顶 pending。
+    """
+    if not all(gates.get(k, {}).get("pass") is True for k in HARD_GATES):
+        return False
+    if any(v.get("pass") is False for k, v in gates.items() if k not in HARD_GATES):
+        return False
+    if any(v.get("pass") is False for v in fg.values()):
+        return False
+    if info.get("inconclusive"):
+        return False
+    if all(v.get("pass") is None for v in fg.values()):
+        return False
+    return True
+
+
 def decide(gates: dict, fg: dict, viol: list, info: dict) -> tuple[str, str]:
     """返回 (verdict, reason_bucket)。"""
     if viol:
         return "invalid", "protocol_invalid"
-    hard_pass = all(gates[k]["pass"] for k in HARD_GATES)
-    soft_fail = [k for k in gates if k not in HARD_GATES and not gates[k]["pass"]]
+    hard_pass = all(gates.get(k, {}).get("pass") is True for k in HARD_GATES)
+    soft_fail = [k for k in gates if k not in HARD_GATES and gates[k].get("pass") is False]
     f_fail = [k for k, v in fg.items() if v.get("pass") is False]
     inconcl = bool(info.get("inconclusive"))
 
@@ -776,6 +864,9 @@ def adjudicate(rnd: dict, ledger: list, no_nag: bool = False,
                                       "MAX_IDLE": MAX_IDLE, "NAG_HOLD": NAG_HOLD,
                                       "NAG_STOP": NAG_STOP, "MIN_REPEAT_N": MIN_REPEAT_N,
                                       "MAX_REPORT_AGE_DAYS": MAX_REPORT_AGE_DAYS,
+                                      "PBO_MAX": PBO_MAX, "SPA_ALPHA": SPA_ALPHA,
+                                      "MAX_RHO_NOVELTY": MAX_RHO_NOVELTY,
+                                      "IC_TMIN": IC_TMIN, "IC_TWEAK": IC_TWEAK,
                                       **(criteria_snapshot or {})}),
     }
     out["next_round"] = next_round_directives(rnd, verdict, gates, fg, info, ledger, budget,
@@ -838,14 +929,18 @@ def _good_round() -> dict:
     return {
         "round_id": 1,
         "candidate": {"id": "BS-1", "name": "因子连续权重", "kind": "k", "family": "fam",
-                      "uses": ["ret20"], "change": {"is_change": True}},
+                      "uses": ["ret20"], "change": {"is_change": True,
+                                                     "target": "engine.py:weight()"}},
         "metrics": {
             "baseline": {"ann": 0.10, "mdd": -0.30},
             "candidate": {"ann": 0.30, "mdd": -0.20, "n": 500, "sharpe": 2.0, "skew": 0.0, "kurt": 3.0},
             "context": {"anchors_ok": True, "coverage": {"ret20": 95.0}, "region": {"expanding": 6},
                         "removed_by_year": {"k": {"2023": 10, "2024": 10}},
                         "base_by_year": {"2023": 10, "2024": 10},
-                        "no_lookahead": {"k": {"ann": 0.25}}, "trials": 3, "ppy": 252},
+                        "no_lookahead": {"k": {"ann": 0.25}}, "trials": 3, "ppy": 252,
+                        "pbo": 0.31, "spa_p": 0.012,
+                        "novelty": {"max_rho": 0.22, "against": ["BS-3"]},
+                        "panel_ic": {"ic": 0.031, "t_adj": 3.1, "ir": 0.62, "n_days": 322}},
         },
         "fwd": {"coverage": "full", "panel_md5": "deadbeef",
                 "caliber": {"adjust": "后复权", "asof": "D−1收盘", "cost": "单边3bp", "universe": "29只ETF"},
@@ -1098,6 +1193,46 @@ def selftest() -> int:
             v23 = adjudicate(dr4, [])
             chk(f"缺回滚点 ⇒ 仅 D3 阻断（blockers={v23['deploy']['blockers']}）",
                 v23["deploy"]["blockers"] == ["D3_rollback_ready"])
+
+    # 24–29) ★ v2.2 四项度量升级（A1 新增量 / A3 PBO·SPA / A6 面板 IC / A2 claim↔diff）
+    chk("新增量 · PBO · SPA · 面板 IC 全过 ⇒ 仍 adopt（未误伤）",
+        adjudicate(gr, [])["verdict"] == "adopt")
+
+    g10 = json.loads(json.dumps(gr))
+    g10["metrics"]["context"]["novelty"] = {"max_rho": 0.78, "against": ["BS-3"]}
+    v10 = adjudicate(g10, [])
+    chk(f"G10 与已采纳结论 ρ=0.78>0.5 ⇒ pending（非新增量）（got={v10['verdict']}）",
+        v10["verdict"] == "pending" and v10["gates"]["G10_novelty"]["pass"] is False)
+
+    g11 = json.loads(json.dumps(gr))
+    g11["metrics"]["context"]["panel_ic"] = {"ic": 0.004, "t_adj": 0.6, "n_days": 322}
+    v11b = adjudicate(g11, [])
+    chk(f"G11 截面 IC t_adj=0.6<1 ⇒ pending（不可判定）（got={v11b['verdict']}）",
+        v11b["verdict"] == "pending" and v11b["gates"]["G11_panel_ic"]["pass"] is False)
+
+    g9b = json.loads(json.dumps(gr))
+    g9b["metrics"]["context"]["pbo"] = 0.72
+    v9b = adjudicate(g9b, [])
+    chk(f"G9b PBO=0.72>0.5 ⇒ pending/evidence_pending（软闸，不判死）（got={v9b['verdict']}/{v9b['reason_bucket']}）",
+        v9b["verdict"] == "pending" and v9b["reason_bucket"] == "evidence_pending")
+
+    g9c = json.loads(json.dumps(gr))
+    g9c["metrics"]["context"]["spa_p"] = 0.31
+    chk(f"G9c SPA p=0.31>0.05 ⇒ pending（got={adjudicate(g9c, [])['verdict']}）",
+        adjudicate(g9c, [])["verdict"] == "pending")
+
+    p9ok = json.loads(json.dumps(gr))
+    p9ok["candidate"]["change"] = {"is_change": True, "target": "engine.py:weight()",
+                                   "actual_files": ["engine.py", "risk.py"]}
+    chk("P9 target 与实际改动文件一致 ⇒ 不违规",
+        adjudicate(p9ok, [])["verdict"] == "adopt")
+
+    p9bad = json.loads(json.dumps(gr))
+    p9bad["candidate"]["change"] = {"is_change": True, "target": "engine.py:weight()",
+                                    "actual_files": ["risk.py"]}
+    vp9 = adjudicate(p9bad, [])
+    chk(f"★ P9 声明改 engine.py 实际只改 risk.py ⇒ invalid（got={vp9['verdict']}）",
+        vp9["verdict"] == "invalid" and any("P9" in s for s in vp9["protocol_violations"]))
 
     print("  自检结论：", "✅ 通过" if not fails else f"❌ 未通过 {fails}")
     return 0 if not fails else 1

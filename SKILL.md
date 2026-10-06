@@ -2,7 +2,7 @@
 name: quant-trading-agent
 display_name: 量化交易Agent策略框架
 display_name_en: Quant Trading Agent Framework (Triad Loop × Forward-First Audit × Preflight)
-version: 2.1.0
+version: 2.2.0
 author: simplify23
 description: 量化交易 Agent 策略框架 v2.1 —— 把「三方闭环迭代」「前向优先反自欺审计」「上线前代码审计」合成一条可执行流水线。正方（探索 / 代码优化实现者）· 反方（政委：风险登记 + 优化处方四件套）· 中立裁判（独立取证 + G1–G9/F0–F6/D0–D4 逐条裁定 + 派工 + ★催办正方去做代码优化）。当用户说「跑一轮三方」「三方裁决」「让框架推进迭代」「催正方去改代码」「反方给优化处方」「策略该不该采纳并继续深挖」「这个结论凭什么算数」「我能测出来吗」「研究收敛了吗」「还能不能再优化」「已证伪的有哪些」「哪些结论经得起实盘」时使用；也用于「上线/实盘/影子盘前审一下代码有没有 bug」「这份代码能不能接钱」「审计一下会不会重复下单/写坏台账」。
 description_en: A triad closed-loop research framework for quantitative strategies — proponent (exploration / code-level optimization) × adversary (risk register + executable optimization prescriptions) × neutral judge (independent re-runs + G1–G9 admission gates, F0–F6 forward-first anti-self-deception audit, D0–D4 pre-deployment code audit with a SHA256 code fingerprint that binds the audit to the exact build). Use it for "run a triad round", "should we adopt this strategy", "is this backtest conclusion trustworthy", "can this effect even be detected" (N* sample-size arithmetic, moving-block CI, diff-trade audit, leave-one-out), "audit this code before going live or paper trading", "which conclusions were already falsified". Enforces — no adoption before sample size reaches N*; "not detected" is never reported as "invalid"; the adversary must deliver executable prescriptions, not just objections; the judge must coach the proponent until code-level optimizations actually land; passing an audit is not the same as being bug-free.
@@ -28,7 +28,14 @@ agent_created: true
 | — | `forward-first-audit` 1.10 | 前向优先反自欺审计（六道闸门 + FPS 因子） | 是体检手册，不驱动迭代 |
 | — | `quant-agent-framework` 3.0（开发线） | 判决书携带「下一轮指令」的三方闭环 | 派了工但**不催**；反方只反对、**不给怎么改** |
 | **2.0** | 本框架 | 合并上述全部，补上【裁判催办】与【反方政委包】两条硬契约 | 只管研究结论，不管代码能不能接钱 |
-| **2.1** | **本框架（现役）** | 再加 **D0–D4 部署审计**：上线/实盘/影子盘前扫已知致命 bug 形态，并用代码指纹钉死「审的就是要上的」 | — |
+| **2.1** | 本框架 | 再加 **D0–D4 部署审计**（上线/实盘/影子盘前的代码 bug 闸门 + 代码指纹防「审完又改」） | 判据只有 DSR 一项多重检验校正；无「新增量」闸 |
+| **2.2** | **本框架（现役）** | 再加 **四项度量升级**：G9 拆 **G9a/b/c**（DSR + PBO + SPA）｜**G10 新增量闸**（与已采纳结论 ρ≤0.5）｜**G11 面板 IC**（t_adj≥2）｜**P9 claim↔diff 绑定** | — |
+
+**v2.2 的四项升级各来自哪里**（不是自创口号，每条都有出处）：
+- **G9b/G9c（PBO/SPA）** ← MinervaScore 把 DSR+PBO+SPA 组合成分级的做法；本项目 `ar_judge.py` 早有实现，此前**没接进闸门**。
+- **G10 新增量** ← FactorMiner 的「与已有因子 ρ>0.5 淘汰」；本项目同型事故是**两份同义实现各自演进**（先例 P-13）。
+- **G11 面板 IC** ← QuantaAlpha / FactorMiner / AlphaAgent 全部以 IC/ICIR 为通用语言；面板级样本效率比逐笔高一个量级。
+- **P9 claim↔diff** ← AlphaAgent 的「假设—实现语义一致性」；防「说改 A 实际改 B」。
 
 v2.0 补的两个执行缺口（**引擎机械强制，不靠自觉**）：
 1. ★**裁判催办**：判决书必带 `coach`（nag_level / must_do / escalation）；正方不响应派工 ⇒ 逐级升级，到停工清偿、直至终止迭代。
@@ -72,6 +79,7 @@ v2.1 再补第三个缺口：
 | **P7** | ★正方须回填 `responded_tasks`；未响应 ⇒ nag+1 | 升级至停工清偿（`hold_new_candidates`） |
 | **P7b** | ★裁判每轮必派 ≥1 条 `kind=code_optimization` | 裁判失职 |
 | **P8** | ★选优键 `rank_key_source` ∈ {holdout, full} | invalid（作弊键） |
+| **P9** | ★改动型候选须声明 `change.target`；若给了 `actual_files`，目标文件必须在其内 | invalid（**主张与实现不符**） |
 | P4 | 收敛四闸任一触发 ⇒ `continue=false` 并写明 stop_reason | 停止迭代 |
 | P5 | 判据文件 SHA256 指纹随判决落盘 | 事后偷改可检出 |
 
@@ -80,9 +88,13 @@ v2.1 再补第三个缺口：
 
 ## 四、判据（两组，逐条独立成败，不加权）
 
-**G1–G9 准入组**：G1 锚点自校验｜G2 主指标优于基线｜G3 风险不劣化｜G4 影响样本 ≥8
-｜G5 变量覆盖率 ≥90%｜G6 连续优区 ≥4 格｜G7 影响不与单一自然年重合｜G8 无前视口径同样通过｜G9 DSR ≥0.95（试错折减）
-⇒ 硬闸 = G1/G2/G3/G4/G8/G9；软闸缺 ⇒ pending。
+**G1–G11 准入组**：G1 锚点自校验｜G2 主指标优于基线｜G3 风险不劣化｜G4 影响样本 ≥8
+｜G5 变量覆盖率 ≥90%｜G6 连续优区 ≥4 格｜G7 影响不与单一自然年重合｜G8 无前视口径同样通过
+｜**G9a DSR ≥0.95**（试错折减）｜**G9b PBO ≤0.5**（软闸：单次 sd≈0.26，只作辅助诊断）
+｜**G9c SPA p ≤0.05**（族内最优 vs 基准）｜**G10 与已采纳结论最大 \|ρ\| ≤0.5**（新增量）
+｜**G11 截面 IC 的 t_adj ≥2**（按日聚类后除 √h）。
+⇒ 硬闸 = G1/G2/G3/G4/G8/**G9a**；软闸缺（含 G9b/G9c/G10/G11 明确不过）⇒ pending；
+**`pass=None`（未提供）既不算过也不算不过**。
 
 **F0–F6 前向体检组**（没做体检 ⇒ 判决封顶 pending）：
 F0 口径指纹（panel_md5 + 复权/时点/成本/宇宙）｜**F1 样本量算术 N\* = ⌈(2σ/μ)²⌉**（n < N\* ⇒ **只许「未检出」**）
@@ -103,8 +115,9 @@ PY=python3
 D=~/.workbuddy/skills/quant-trading-agent
 
 # 0) 自检（必跑；不过 ⇒ 后面全部结论作废）
-$PY $D/scripts/qta_loop.py --selftest          # 33 项：噪声识破 / 三态 / 政委 / 催办 / 部署审计 / nan / 指纹 …
+$PY $D/scripts/qta_loop.py --selftest          # 40 项：噪声识破 / 三态 / 政委 / 催办 / 部署审计 / 新增量 / PBO / IC / nan / 指纹 …
 $PY $D/scripts/preflight_audit.py --selftest   # 25 项：规则命中 + ★误报闸（干净代码必须 0 命中）
+$PY $D/scripts/overfit_metrics.py --selftest   # 10 项：PBO / SPA 的白噪声校准与方向性（纯标准库）
 $PY $D/scripts/fps_factor.py --selftest        # 因子层 13 项（需 numpy+pandas）
 # 或一键：$PY $D/scripts/selftest_all.py
 
@@ -159,6 +172,7 @@ $PY $D/scripts/preflight_audit.py --mode live --targets <代码路径…> \
 - `references/precedent.md` 先例案卷 P-01…P-33（接入新项目前先对表）
 - `scripts/qta_loop.py` 主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
 - `scripts/preflight_audit.py` ★代码审计器（静态扫描 P0/P1/P2 + 代码指纹 + `.preflightignore`）
+- `scripts/overfit_metrics.py` ★多重检验度量（**PBO / CSCV + Hansen SPA**，纯标准库，白噪声校准）
 - `scripts/fps_factor.py` 稳健度因子（N\* / moving-block CI / sign-flip / 选择自由度 / FPS）
-- `scripts/selftest_all.py` 一键自检（引擎 + 因子 + 审计器）
+- `scripts/selftest_all.py` 一键自检（引擎 + 审计 + 度量 + 因子）
 - `examples/` 合规、驳回、违规三类 round.json（selftest 之外的第二层自证）

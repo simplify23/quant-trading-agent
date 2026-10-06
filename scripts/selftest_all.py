@@ -40,6 +40,8 @@ def main() -> int:
                        HERE / "qta_loop.py")
     rc_audit, _ = run("审计层 · preflight_audit（P0/P1/P2 规则 + 代码指纹 + .preflightignore）",
                       HERE / "preflight_audit.py")
+    rc_overfit, _ = run("度量层 · overfit_metrics（PBO · SPA，纯标准库）",
+                        HERE / "overfit_metrics.py")
     rc_factor, out_factor = run("因子层 · fps_factor（N* / moving-block CI / 选择自由度 / 可分辨性 / FPS）",
                                 HERE / "fps_factor.py")
 
@@ -56,15 +58,17 @@ def main() -> int:
     print("\n" + "=" * 74)
     print(f"引擎层 qta_loop       ：{mark(rc_engine)}")
     print(f"审计层 preflight_audit：{mark(rc_audit)}")
+    print(f"度量层 overfit_metrics：{mark(rc_overfit)}")
     print(f"因子层 fps_factor     ：{mark(rc_factor, missing_dep)}")
     if missing_dep:
-        print("\n提示：因子层需要 numpy + pandas，当前解释器没装 —— 这不影响引擎层与审计层"
+        print("\n提示：因子层需要 numpy + pandas，当前解释器没装 —— 这不影响引擎层、审计层与度量层"
               "（它们零第三方依赖）。\n      装好依赖后重跑，或指定一个装了这两个包的解释器：")
         print("  QTA_PY=/path/to/python-with-numpy-pandas python3 scripts/selftest_all.py")
     print("=" * 74)
-    ok = rc_engine == 0 and rc_audit == 0 and (rc_factor == 0 or missing_dep)
+    ok = (rc_engine == 0 and rc_audit == 0 and rc_overfit == 0
+          and (rc_factor == 0 or missing_dep))
     if missing_dep and ok:
-        print("结论：核心两层通过；因子层未测（非失败）。")
+        print("结论：核心三层通过；因子层未测（非失败）。")
     return 0 if ok else 1
 
 

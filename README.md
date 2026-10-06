@@ -1,10 +1,9 @@
-# 量化交易Agent策略框架 v2.1（quant-trading-agent）
+# 量化交易Agent策略框架 v2.2（quant-trading-agent）
 
 > **判决不是终点，下一轮才是。**
-> 三方闭环迭代（正方 / 反方 / 中立裁判）× 前向优先反自欺审计（F0–F6）× **上线前代码审计（D0–D4）**，
-> 合成一条可执行流水线；并补上三个执行缺口：
-> ★**裁判催办**（盯着正方把代码优化做完）、★**反方政委包**（风控之外必须给"怎么改"）、
-> ★**部署审计**（接钱之前先扫已知致命 bug，并用代码指纹钉死"审的就是要上的"）。
+> 三方闭环迭代（正方 / 反方 / 中立裁判）× 前向优先反自欺审计（F0–F6）× 上线前代码审计（D0–D4），
+> 合成一条可执行流水线；并补上执行缺口：★**裁判催办**、★**反方政委包**、★**部署审计**、
+> ★**v2.2 四项度量升级**（PBO/SPA · 新增量闸 · 面板 IC · claim↔diff 绑定）。
 
 ## 一、它解决什么
 
@@ -30,7 +29,8 @@
 | — | `forward-first-audit` 1.10 | 前向优先反自欺审计（六道闸门 + FPS 因子） | 是体检手册，不驱动迭代 |
 | — | `quant-agent-framework` 3.0（开发线） | 判决书携带「下一轮指令」的三方闭环 | 派了工但**不催**；反方只反对、**不给怎么改** |
 | **2.0** | 本框架 | 合并上述全部 + 催办 / 政委包两条硬契约 | 只管研究结论，不管代码能不能接钱 |
-| **2.1** | **本框架（现役）** | 再加 **D0–D4 部署审计** | — |
+| **2.1** | 本框架 | 再加 **D0–D4 部署审计**（上线前的代码 bug 闸门 + 代码指纹防「审完又改」） | 判据只有 DSR 一项多重检验校正 |
+| **2.2** | **本框架（现役）** | 再加 **四项度量升级**：G9 拆 **G9a/b/c**（DSR+PBO+SPA）、**G10 新增量闸**、**G11 面板 IC**、**P9 claim↔diff 绑定** | — |
 
 > 旧的两个 skill 已整合进本包并移除。对应关系：
 > `forward-first-audit` 的六道闸门与 18 个踩坑 → `references/forward-first.md`；
@@ -48,7 +48,7 @@
 PY=python3
 D=~/.workbuddy/skills/quant-trading-agent
 
-# 0) 一键自检（必跑：引擎 33 + 审计 25 + 因子 13）
+# 0) 一键自检（必跑：引擎 40 + 审计 25 + 度量 10 + 因子 13）
 $PY $D/scripts/selftest_all.py
 
 # 1) 跑一轮三方：round.json → verdict.json
@@ -77,13 +77,14 @@ quant-trading-agent/
 ├── references/
 │   ├── roles.md                 三角色职责、政委包字段细则、催办状态机、部署审计职责
 │   ├── protocol.md              round.json / verdict.json 完整 schema、裁决真值表、台账格式
-│   ├── rubric.md                G1–G9 + F0–F6 + D0–D4 判据、阈值清单、N*/DSR/FPS 公式与局限
+│   ├── rubric.md                G1–G11 + F0–F6 + D0–D4 判据、阈值清单、N*/DSR/PBO/SPA 公式与局限
 │   ├── forward-first.md         前向优先手册：六道闸门 + 18 个踩坑 + 十一条不许
 │   ├── preflight-audit.md       ★上线前代码审计：规则表 + 自动化查不到什么 + 上线前必答清单
 │   └── precedent.md             先例案卷 P-01…P-33（接入新项目前先对表）
 ├── scripts/
 │   ├── qta_loop.py              主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
 │   ├── preflight_audit.py       ★代码审计器（P0/P1/P2 + 代码指纹 + .preflightignore）
+│   ├── overfit_metrics.py       ★多重检验度量（PBO/CSCV + Hansen SPA，纯标准库，白噪声校准）
 │   ├── fps_factor.py            稳健度因子（N* / block CI / sign-flip / 自由度 / FPS）
 │   ├── selftest_all.py          一键自检
 │   └── fixtures/                审计器自检夹具（默认跳过，不参与生产审计）

@@ -20,7 +20,11 @@
       "base_by_year": {"2023": 160, "2024": 170, "2025": 170},
       "no_lookahead": {"single_key": {"ann": 0.250}},
       "trials": 3,
-      "ppy": 242
+      "ppy": 242,
+      "pbo": 0.31,
+      "spa_p": 0.012,
+      "novelty": {"max_rho": 0.22, "against": ["BS-3", "BS-7"]},
+      "panel_ic": {"ic": 0.031, "t_adj": 3.1, "ir": 0.62, "n_days": 322}
     }
   },
   "fwd": {
