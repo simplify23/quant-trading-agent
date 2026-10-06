@@ -3,3 +3,10 @@ __pycache__/
 *.pyo
 release/*.zip
 .DS_Store
+
+# LaTeX build artefacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
