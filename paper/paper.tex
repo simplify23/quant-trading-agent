@@ -303,30 +303,40 @@ its adoption rate is identically one and cannot be aligned. A valid control must
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
   font=\small,
-  box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt, minimum height=8mm},
-  arm/.style={draw, rounded corners=2pt, align=center, inner sep=4pt, minimum height=7mm, fill=black!4},
-  ar/.style={-{Latex[length=2mm]}, thick}]
-\node[box] (real) at (0,0) {Real panel\\29 ETFs, 745 days};
-\node[box, right=9mm of real] (inj) {Inject known $\alpha$\\into $K$ of $N$ candidates};
-\node[box, right=9mm of inj] (truth) {Ground truth\\observable};
-\draw[ar] (real) -- (inj);  \draw[ar] (inj) -- (truth);
-\node[box, below=6mm of real, text width=26mm] (p1) {Panel I\\synthetic\\independent};
-\node[box, below=6mm of inj, text width=26mm] (p2) {Panel II\\real-calibrated\\strategy family};
-\node[box, below=6mm of truth, text width=26mm] (p3) {Panel III\\real cross-section\\(counter-example)};
-\draw[ar] (real.south) -- (p1.north);  \draw[ar] (inj.south) -- (p2.north);  \draw[ar] (truth.south) -- (p3.north);
-\node[arm, right=14mm of truth, yshift=8mm, text width=34mm] (a) {\textbf{A} pure search\\highest training Sharpe};
-\node[arm, below=3mm of a, text width=34mm] (b) {\textbf{B} gate\\adopt best passer, else abstain};
-\node[arm, below=3mm of b, text width=34mm] (c) {\textbf{C} random admission\\same rate, coin flip};
-\draw[ar] ([yshift=4mm]truth.east) -- (a.west);
-\node[box, right=8mm of b, text width=30mm, fill=black!8] (cmp) {Compare\\$\Delta\text{FDR}=\text{FDR}_C-\text{FDR}_B$};
-\draw[ar] (a.east) -- (a.east -| cmp.west);
+  st/.style={circle, draw, inner sep=1.4pt, font=\scriptsize\bfseries, minimum size=4.2mm},
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=3.5pt, minimum height=7.5mm},
+  arm/.style={draw, rounded corners=2pt, align=center, inner sep=3.5pt, minimum height=7mm},
+  ar/.style={-{Latex[length=2mm]}, semithick}]
+\node[box] (real) at (0,0) {Real panel};
+\node[box, right=8mm of real] (inj) {Inject known $\alpha$};
+\node[box, right=8mm of inj] (truth) {Ground truth observable};
+\draw[ar] (real) -- (inj);
+\draw[ar] (inj) -- (truth);
+\node[st] at ([yshift=4mm]real.north) {1};
+\node[box, below=8mm of real,  text width=21mm] (p1) {Panel I synthetic};
+\node[box, below=8mm of inj,   text width=23mm] (p2) {Panel II real-calibrated};
+\node[box, below=8mm of truth, text width=21mm] (p3) {Panel III real cross-section};
+\draw[ar] (real.south) -- (p1.north);
+\draw[ar] (inj.south) -- (p2.north);
+\draw[ar] (truth.south) -- (p3.north);
+\node[st] at ([xshift=-7mm]p1.west) {2};
+\node[arm, right=16mm of truth, yshift=11mm, text width=33mm] (a) {\textbf{A}~pure search: highest training Sharpe};
+\node[arm, below=3mm of a, text width=33mm] (b) {\textbf{B}~gate: adopt best passer, else abstain};
+\node[arm, below=3mm of b, text width=33mm] (c) {\textbf{C}~random admission: same rate, coin flip};
+\draw[ar] ([yshift=6mm]truth.east) -- (a.west);
+\node[st] at ([yshift=4mm]a.north) {3};
+\node[box, right=9mm of b, text width=27mm, fill=black!8] (cmp)
+  {compare $\Delta\text{FDR}=\text{FDR}_C-\text{FDR}_B$};
+\draw[ar] (a.east) -| ([xshift=-4mm]cmp.north);
 \draw[ar] (b.east) -- (cmp.west);
-\draw[ar] (c.east) -- (c.east -| cmp.west);
+\draw[ar] (c.east) -| ([xshift=4mm]cmp.south);
+\node[st] at ([xshift=7mm]cmp.east) {4};
 \end{tikzpicture}}
-\caption{The injected-truth protocol. Ground truth is injected rather than assumed, which makes
-false discovery rate directly measurable. Arm~C adopts at the \emph{same rate} as arm~B but by
-coin flip; only if $\Delta\text{FDR}>0$ does the gate carry information rather than merely being
-more conservative.}
+\caption{The injected-truth protocol, in four numbered steps: (1)~inject a known effect so that
+ground truth becomes observable; (2)~instantiate it in one of three panel families; (3)~apply
+three arms to the same candidate set---arm~C adopts at the \emph{same rate} as arm~B but by coin
+flip; (4)~compare. Only if $\Delta\text{FDR}>0$ does the gate carry information rather than
+merely being more conservative.}
 \label{fig:protocol}
 \end{figure}
 
