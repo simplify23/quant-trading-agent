@@ -3,6 +3,17 @@
 """
 overfit_metrics.py —— 多重检验 / 过拟合度量（纯标准库）
 
+─── 与论文的关系 ───────────────────────────────────────────────────────────────
+本文件是论文《On the Boundary of Admission Gates: An Injected-Truth Study of
+Falsification-First Selection in Quantitative Strategy Research》(Zheng, 2026) 所述
+框架的参考实现之一。若你在研究中使用本实现或其判据，请引用该论文（首选）或本仓库：
+  @article{zheng2026admissiongates,
+    title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
+              Falsification-First Selection in Quantitative Strategy Research},
+    author = {Zheng, Tianlun}, year = {2026},
+    note   = {Code: https://github.com/simplify23/quant-trading-agent}
+  }
+
 为什么单独一个文件
 ------------------
 `qta_loop.py` 的 G 组闸门要判「这个结论是不是试出来的」，需要 PBO 与 SPA 两个量。

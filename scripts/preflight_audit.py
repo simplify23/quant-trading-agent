@@ -3,6 +3,17 @@
 """
 preflight_audit.py —— 上线 / 实盘 / 影子盘前的代码审计（静态扫描 + 分级闸门）
 
+─── 与论文的关系 ───────────────────────────────────────────────────────────────
+本文件是论文《On the Boundary of Admission Gates: An Injected-Truth Study of
+Falsification-First Selection in Quantitative Strategy Research》(Zheng, 2026) 所述
+框架的参考实现之一。若你在研究中使用本实现或其判据，请引用该论文（首选）或本仓库：
+  @article{zheng2026admissiongates,
+    title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
+              Falsification-First Selection in Quantitative Strategy Research},
+    author = {Zheng, Tianlun}, year = {2026},
+    note   = {Code: https://github.com/simplify23/quant-trading-agent}
+  }
+
 定位：**在把代码接上真实资金或影子账本之前，先把「已知会致命的 bug 形态」机械地扫一遍。**
 它只做**机械可判**的部分；语义级的前视/口径审查（"今天收盘的信号赚今天的钱"这类）仍需人工 +
 `trading-pipeline-core` 的 lookahead_lint，可用 `--external-json` 把外部结论并进同一份报告。

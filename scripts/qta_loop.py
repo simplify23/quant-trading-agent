@@ -3,6 +3,17 @@
 """
 qta_loop.py —— 量化交易Agent策略框架 v2.0 · 三方闭环 + 前向体检 + 催办引擎
 
+─── 与论文的关系 ───────────────────────────────────────────────────────────────
+本文件是论文《On the Boundary of Admission Gates: An Injected-Truth Study of
+Falsification-First Selection in Quantitative Strategy Research》(Zheng, 2026) 所述
+框架的参考实现之一。若你在研究中使用本实现或其判据，请引用该论文（首选）或本仓库：
+  @article{zheng2026admissiongates,
+    title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
+              Falsification-First Selection in Quantitative Strategy Research},
+    author = {Zheng, Tianlun}, year = {2026},
+    note   = {Code: https://github.com/simplify23/quant-trading-agent}
+  }
+
 三方：正方（探索 / 代码优化实现者）· 反方（政委：风险登记 + 优化处方）· 中立裁判（取证 + 裁决 + 派工 + 催办）
 
 v2.0 相对前代的三个执行缺口（本引擎把它们变成机械契约，不靠角色自觉）：

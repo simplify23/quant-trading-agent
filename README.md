@@ -1,104 +1,175 @@
-# 量化交易Agent策略框架 v2.2（quant-trading-agent）
+# quant-trading-agent
 
-> **判决不是终点，下一轮才是。**
-> 三方闭环迭代（正方 / 反方 / 中立裁判）× 前向优先反自欺审计（F0–F6）× 上线前代码审计（D0–D4），
-> 合成一条可执行流水线；并补上执行缺口：★**裁判催办**、★**反方政委包**、★**部署审计**、
-> ★**v2.2 四项度量升级**（PBO/SPA · 新增量闸 · 面板 IC · claim↔diff 绑定）。
+> **A falsification-first research framework for quantitative strategy selection.**
+> A triad closed loop — proponent / adversary / neutral judge — wrapped around a
+> forward-first anti-self-deception audit and a pre-deployment code audit.
 
-## 一、它解决什么
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
+[![Version](https://img.shields.io/badge/version-2.2.1-informational.svg)](VERSION)
+[![Paper](https://img.shields.io/badge/paper-PDF%20%2812pp%29-b31b1b.svg)](paper/paper.pdf)
+[![Self-tests](https://img.shields.io/badge/self--tests-88%20passing-brightgreen.svg)](scripts/selftest_all.py)
 
-1. **「这个结论凭什么算数？」**
-   样本量算术 N\*、选择自由度诊断、差异笔审计、留一笔、DSR 试错折减、随机对照零分布。
-   测不出来的时候，说「有效」和「无效」都是错的，正确答案是「**未检出**」。
-2. **「研究跑到哪了、下一步做什么？」**
-   判决书必须携带下一轮指令；裁判**催办**正方，连续不响应 ⇒ 停工清偿 ⇒ 终止迭代。
-3. **「反方除了说不行，还会什么？」**
-   政委包：`risk_register`（防守）+ `opt_prescriptions`（进攻，四件套：
-   target 文件:函数 / action 可执行动作 / expected_delta 预期读数 / rollback 回退口径）。
-4. **★「这份代码能不能接钱？」**（v2.1）
-   上线/实盘/影子盘前扫 P0 前视、返回 nan、自造交易日历、非原子写、跨文件同名实现……
-   并**自己重算代码 sha256** 与审计报告比对 —— 防「审完又改」。
+[中文说明](README.zh-CN.md) · [Reproduction artefacts](experiments/) · [Paper source](paper/)
 
-**它不做**：不产出买卖信号、不下单、不改生产文件、不给仓位建议。
+---
 
-## 二、版本谱系
+## 📄 Paper
 
-| 版本 | 载体 | 一句话 | 缺什么 |
-|---|---|---|---|
-| 1.0 | `strategy-adjudication` | 三方准入：G1–G8，通过即自动并入 | 判完就停，不产生下一轮 |
-| — | `forward-first-audit` 1.10 | 前向优先反自欺审计（六道闸门 + FPS 因子） | 是体检手册，不驱动迭代 |
-| — | `quant-agent-framework` 3.0（开发线） | 判决书携带「下一轮指令」的三方闭环 | 派了工但**不催**；反方只反对、**不给怎么改** |
-| **2.0** | 本框架 | 合并上述全部 + 催办 / 政委包两条硬契约 | 只管研究结论，不管代码能不能接钱 |
-| **2.1** | 本框架 | 再加 **D0–D4 部署审计**（上线前的代码 bug 闸门 + 代码指纹防「审完又改」） | 判据只有 DSR 一项多重检验校正 |
-| **2.2** | **本框架（现役）** | 再加 **四项度量升级**：G9 拆 **G9a/b/c**（DSR+PBO+SPA）、**G10 新增量闸**、**G11 面板 IC**、**P9 claim↔diff 绑定** | — |
+### On the Boundary of Admission Gates: An Injected-Truth Study of Falsification-First Selection in Quantitative Strategy Research
 
-> 旧的两个 skill 已整合进本包并移除。对应关系：
-> `forward-first-audit` 的六道闸门与 18 个踩坑 → `references/forward-first.md`；
-> 其技术结论 → `references/precedent.md` 的 P-16…P-33；
-> `quant-agent-framework` 的三方闭环协议 → 引擎 `qta_loop.py`；
-> 它的 `build.sh` 五步验收 → 本包 `build.sh` 的七步验收。
+**Tianlun Zheng** (Fudan University) · 2026 · 12 pages
 
-## 三、环境要求与快速上手
+📕 **[Read the PDF](paper/paper.pdf)** ｜ 📝 [LaTeX source](paper/paper.tex) ｜
+🔍 [Pre-submission audit](paper/review_checklist.md) ｜ 🧪 [Experiments](experiments/)
 
-**环境**：Python ≥ 3.9 —— 引擎层与审计层**只用标准库、零第三方依赖**；因子层 `fps_factor.py`
-需要 `numpy + pandas`（缺了只会跳过这一层，其余照常）；`build.sh` 需要 `bash` + `zip` + `grep`（可选，仅分发时用）。
-**无网络访问、无外部 API、无需任何密钥**；所有脚本都只在你显式指定/调用的路径上读写。
+**The question.** Every automated research pipeline that admits conclusions must decide
+*when to stop believing its own output*. Admission gates are the instrument that decision
+rests on — yet their effectiveness is usually **assumed rather than measured**. We measure it.
+
+**What we find.**
+
+| Finding | Result |
+|---|---|
+| **Gates are not just "more conservative"** | At an **equal adoption rate**, the gate's false-discovery rate is well below a coin-flip control (ΔFDR = 0.10–0.60, holding in 5 of 7 settings) |
+| **But their value has a boundary** | It materialises only for training-period $t < 2.5$; the cost is an adoption rate of **1–7%** |
+| **Beyond $t \approx 2.5$ they are pure overhead** | Pure search already errs essentially never, and gating only lowers the adoption rate |
+| **★ A necessary condition** | Criteria computed on **absolute** rather than **excess** returns **silently reject every candidate** — including a ground-truth signal with $t = 4.0$ |
+
+**Why it matters.** If gates are weaker than assumed, the pipelines relying on them inherit an
+unbounded false-discovery risk; if they are merely conservative, those pipelines silently
+discard real findings. **Neither failure is visible from the outside.**
+
+**Cite it**
+
+```bibtex
+@article{zheng2026admissiongates,
+  title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
+            Falsification-First Selection in Quantitative Strategy Research},
+  author = {Zheng, Tianlun},
+  year   = {2026},
+  note   = {Preprint. Code and data: \url{https://github.com/simplify23/quant-trading-agent}}
+}
+```
+
+> arXiv link **pending** — the identifiers in `CITATION.cff` and this section will be filled in
+> once the preprint is online. We deliberately leave them empty rather than publish a dead link.
+
+---
+
+## What this repository contains
+
+This repository serves two purposes at once:
+
+**① The code and experiments behind the paper.** The protocol is reproducible end to end:
+
+```bash
+python3 experiments/exp1_injected_gate_efficacy.py --reps 400          # synthetic panel
+python3 experiments/exp2_real_based_validation.py --reps 400 \
+        --panel-kind strategy --sigma-e 0.007 \
+        --alphas 0.00039 0.00059 0.00098 0.00156                       # real-calibrated
+```
+
+Every number in the paper traces back to the `*_results.json` files in
+[`experiments/`](experiments/). The data anchor is a 29-ETF A-share panel (746 days,
+backward-adjusted): 29 assets, 745 return points, kurtosis 7.84, mean cross-sectional
+correlation 0.504.
+
+**② A runnable framework** — the same triad loop used to generate the paper's negative
+results, packaged so you can point it at your own project.
+
+| It answers | How |
+|---|---|
+| *"Does this conclusion deserve to be believed?"* | Sample-size arithmetic $N^*$, selection-degree-of-freedom diagnostics, difference-trade auditing, leave-one-out, DSR trial deflation, random-control null distributions |
+| *"Where is the research and what is next?"* | Every verdict carries next-round directives; the judge **nags** the proponent, escalating to work stoppage, then termination |
+| *"Can the adversary do more than say no?"* | A commissar pack: `risk_register` (defence) **plus** `opt_prescriptions` (offence) — each with target `file:function`, an executable action, an expected delta, and a rollback path |
+| *"★ Can this code take real money?"* | Pre-deployment audit (D0–D4): look-ahead, `nan` returns, home-made trading calendars, non-atomic writes, cross-file duplicate implementations — with a **recomputed sha256 fingerprint** so the judge verifies what was audited is what ships |
+
+**It does not** produce trading signals, place orders, modify production files, or give
+position advice.
+
+---
+
+## Quick start
 
 ```bash
 PY=python3
-D=~/.workbuddy/skills/quant-trading-agent
+D=.
 
-# 0) 一键自检（必跑：引擎 40 + 审计 25 + 度量 10 + 因子 13）
+# 0) Self-tests — must pass first (engine 40 + audit 25 + metrics 10 + factor 13 = 88)
 $PY $D/scripts/selftest_all.py
 
-# 1) 跑一轮三方：round.json → verdict.json
-$PY $D/scripts/qta_loop.py --round round.json --ledger qta_ledger.jsonl --out verdict.json --explain
+# 1) Run one triad round: round.json → verdict.json
+$PY $D/scripts/qta_loop.py --round examples/round_good.json \
+     --ledger qta_ledger.jsonl --out verdict.json --explain
 
-# 2) ★ 上线/实盘/影子盘前：先审代码，再让裁判（D 组）判定能不能接钱
-$PY $D/scripts/preflight_audit.py --mode live --targets <代码路径…> \
-     --rollback-point "<回滚点>" --out-dir ./pf      # 退出码 3 = 有 P0，阻断
-# 把 ./pf/preflight_report.json 路径填进 round.json 的 deploy.preflight.path
+# 2) ★ Before going live / paper-trading: audit the code, then let the judge rule
+$PY $D/scripts/preflight_audit.py --mode live --targets <code paths...> \
+     --rollback-point "<rollback point>" --out-dir ./pf      # exit 3 = P0 present, blocks
+# then put ./pf/preflight_report.json into round.json's deploy.preflight.path
 
-# 3) 分发前验收 + 打包
+# 3) Distribution check + packaging
 PY=$PY bash $D/build.sh
 ```
 
-**示例轮次**（可直接跑）：`examples/round_good.json` → adopt｜
-`examples/round_reject_with_commissar.json` → reject｜`examples/round_bad_protocol.json` → invalid。
+**Three example rounds** you can run immediately:
+`examples/round_good.json` → adopt ｜ `examples/round_reject_with_commissar.json` → reject ｜
+`examples/round_bad_protocol.json` → invalid.
 
-## 四、目录
+**Requirements.** Python ≥ 3.9. The engine, audit and metrics layers use the
+**standard library only** — zero third-party dependencies. Only the factor layer
+(`fps_factor.py`) needs `numpy + pandas`, and if they are missing it is reported as
+**not measured**, never as a failure. No network access, no API keys; scripts read and
+write only the paths you pass them.
+
+---
+
+## Repository layout
 
 ```
 quant-trading-agent/
-├── SKILL.md                     主入口：三角色 / 闭环协议 / P 系列契约 / 三组判据 / 九条铁律
-├── README.md                    本文件
-├── VERSION                      2.1.0
-├── build.sh                     七步分发验收 + 打包 + 解包复验
+├── CITATION.cff                 ★ "Cite this repository" metadata (points at the paper)
+├── SKILL.md                     Framework entry: roles / loop protocol / P-contracts / gates
+├── README.md                    This file
+├── README.zh-CN.md              Chinese version
+├── VERSION                      2.2.1
+├── build.sh                     Eight-step distribution check + packaging
+├── LICENSE.txt                  MIT
+├── paper/                       ★ The paper
+│   ├── paper.tex / paper.pdf    12 pages, compile with pdflatex (no external assets)
+│   ├── arxiv_metadata.md        Copy-paste fields for the arXiv submission form
+│   ├── review_checklist.md      Pre-submission format audit (4 rounds)
+│   └── writing_notes_and_audit.md  Digested writing advice + 16-point self-audit
+├── experiments/                 ★ Reproduction artefacts (see above)
 ├── references/
-│   ├── roles.md                 三角色职责、政委包字段细则、催办状态机、部署审计职责
-│   ├── protocol.md              round.json / verdict.json 完整 schema、裁决真值表、台账格式
-│   ├── rubric.md                G1–G11 + F0–F6 + D0–D4 判据、阈值清单、N*/DSR/PBO/SPA 公式与局限
-│   ├── forward-first.md         前向优先手册：六道闸门 + 18 个踩坑 + 十一条不许
-│   ├── preflight-audit.md       ★上线前代码审计：规则表 + 自动化查不到什么 + 上线前必答清单
-│   └── precedent.md             先例案卷 P-01…P-38（接入新项目前先对表）
+│   ├── roles.md                 Role duties, commissar-pack schema, nag state machine
+│   ├── protocol.md              round.json / verdict.json schemas, verdict truth table
+│   ├── rubric.md                G1–G11 + F0–F6 + D0–D4 thresholds; N*/DSR/PBO/SPA limits
+│   ├── forward-first.md         Forward-first handbook: six gates + 18 pitfalls
+│   ├── preflight-audit.md       ★ Pre-deployment audit: rule table + what it cannot catch
+│   └── precedent.md             Case file P-01…P-38 (check against it before adopting)
 ├── scripts/
-│   ├── qta_loop.py              主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
-│   ├── preflight_audit.py       ★代码审计器（P0/P1/P2 + 代码指纹 + .preflightignore）
-│   ├── overfit_metrics.py       ★多重检验度量（PBO/CSCV + Hansen SPA，纯标准库，白噪声校准）
-│   ├── fps_factor.py            稳健度因子（N* / block CI / sign-flip / 自由度 / FPS）
-│   ├── selftest_all.py          一键自检
-│   └── fixtures/                审计器自检夹具（默认跳过，不参与生产审计）
-├── examples/                    三类 round.json + 驳回带政委包示例
-└── release/                     打包产物与上传清单（不入包）
+│   ├── qta_loop.py              Main engine (verdict + dispatch + nag + deploy audit)
+│   ├── preflight_audit.py       ★ Code auditor (P0/P1/P2 + code fingerprint)
+│   ├── overfit_metrics.py       ★ PBO/CSCV + Hansen SPA, stdlib-only, noise-calibrated
+│   ├── fps_factor.py            Robustness factor (N* / block CI / sign-flip / FPS)
+│   └── selftest_all.py          One-shot self-test
+└── examples/                    Three sample rounds
 ```
 
-## 五、边界与免责
+---
 
-- adopt 的自动并入须由宿主项目提供 apply / verify / revert；**无 revert 的候选即使全过也降级 pending**。
-- D 组只判「能不能接真实资金」，**不判策略好坏**；**审计通过 ≠ 没有 bug**。
-- 样本量与试验次数不足时，正确输出是 `pending` + 「还差什么」，不是 `reject`。
-- 所有输出均为工程研究内容，**不构成投资建议**。
+## Scope and disclaimer
 
-## 六、许可
+- Automatic adoption of an `adopt` verdict requires the host project to provide
+  apply / verify / revert; **a candidate with no rollback path is downgraded to `pending`
+  even if it passes everything else**.
+- The deploy gates judge only *"can this take real money"*, **not whether the strategy is
+  good**. **Passing an audit is not the same as being bug-free.**
+- When sample size or trial count is insufficient, the correct output is
+  `pending` + "what is still missing" — never `reject`. **"Not detected" is not "invalid".**
+- All output is engineering research. **Not investment advice.**
 
-见 `LICENSE.txt`。
+## License
+
+MIT — see [LICENSE.txt](LICENSE.txt).

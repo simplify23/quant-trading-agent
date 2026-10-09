@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use this software or its methodology, please cite the accompanying paper (preferred) or this repository."
+type: software
+title: "quant-trading-agent: a falsification-first research framework for quantitative strategy selection"
+abstract: >-
+  A triad closed-loop research framework for quantitative strategies:
+  proponent (exploration / code-level optimisation) x adversary (risk register plus
+  executable optimisation prescriptions) x neutral judge (independent re-runs, G1-G11
+  admission gates, F0-F6 forward-first anti-self-deception audit, D0-D4 pre-deployment
+  code audit with a SHA256 fingerprint). Includes an injected-truth evaluation protocol
+  with a random-admission control, and the experiments behind the accompanying paper.
+authors:
+  - family-names: "Zheng"
+    given-names: "Tianlun"
+    affiliation: "Fudan University"
+version: "2.2.1"
+date-released: "2026-10-06"
+license: MIT
+repository-code: "https://github.com/simplify23/quant-trading-agent"
+url: "https://github.com/simplify23/quant-trading-agent"
+keywords:
+  - "quantitative finance"
+  - "multiple testing"
+  - "backtest overfitting"
+  - "deflated Sharpe ratio"
+  - "false discovery rate"
+  - "strategy admission"
+  - "research methodology"
+  - "replication crisis"
+  - "injected-truth validation"
+preferred-citation:
+  type: article
+  title: "On the Boundary of Admission Gates: An Injected-Truth Study of Falsification-First Selection in Quantitative Strategy Research"
+  abstract: >-
+    Strategy research conflates two problems: finding a profitable rule, and establishing
+    that the finding is not search luck. We introduce an injected-truth protocol with a
+    random-admission control, and show across synthetic and real-calibrated panels that
+    admission gates eliminate false discoveries in the weak-signal regime but cut adoption
+    to 1-7%, add nothing when signals are strong, and silently reject every candidate when
+    criteria are computed on absolute rather than excess returns.
+  authors:
+    - family-names: "Zheng"
+      given-names: "Tianlun"
+      affiliation: "Fudan University"
+  year: 2026
+  # ---------------------------------------------------------------------------
+  # ★ 待回填（arXiv 上传后）：
+  #   1) 取消下面两行的注释，并把 <arXiv-ID> 换成真实编号（如 2610.12345）
+  #   2) 同时更新 README.md 的 Paper 区块与 paper/arxiv_metadata.md
+  #   doi: "10.48550/arXiv.<arXiv-ID>"
+  #   url: "https://arxiv.org/abs/<arXiv-ID>"
+  #   ★ 在拿到真实编号之前刻意留空：宁可暂时没有 DOI，也不要写一个假链接。
+  # ---------------------------------------------------------------------------

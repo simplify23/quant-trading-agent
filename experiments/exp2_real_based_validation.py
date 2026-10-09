@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import math
 import sys
 import time
@@ -29,8 +30,11 @@ sys.path.insert(0, str(HERE))
 import exp1_injected_gate_efficacy as e1   # noqa: E402  ★ 复用判据与汇总，不复制
 
 VERSION = "1.0.0"
-PANEL = Path("/Users/simplify/Desktop/自己/量化策略/潮汐策略/潮汐_0.74/"
-             "data_cache.nosync/etf_panel_ts.frozen-20260930.json")
+# 数据锚点：29 只 A 股 ETF 面板（后复权，746 日）。
+# ★ 已随仓库分发在 experiments/data/ 下；也可用 --panel 或环境变量 QTA_ETF_PANEL
+#   指向你本地的副本（例如你自己从 tushare 拉的那一份）。
+PANEL = Path(os.environ.get(
+    "QTA_ETF_PANEL", str(HERE / "data" / "etf_panel_ts.frozen-20260930.json")))
 
 
 def load_real_returns(path: Path, min_len: int) -> tuple[np.ndarray, list[str]]:
@@ -148,6 +152,8 @@ def one_run(rng, R_real: np.ndarray, alpha: float, k_true: int,
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--panel", default=None,
+                    help="ETF 面板 JSON 路径（默认用 experiments/data/ 下的随仓库副本）")
     ap.add_argument("--reps", type=int, default=300)
     ap.add_argument("--k-true", type=int, default=5)
     ap.add_argument("--alphas", type=float, nargs="*",
@@ -161,13 +167,16 @@ def main() -> int:
     ap.add_argument("--out", default=str(HERE))
     args = ap.parse_args()
 
-    R_real, codes = load_real_returns(PANEL, e1.T_TRAIN * 2)
+    panel_path = Path(args.panel) if args.panel else PANEL
+    if not panel_path.exists():
+        raise SystemExit("面板不存在：%s\n  请用 --panel <path> 指定，或设置 QTA_ETF_PANEL。" % panel_path)
+    R_real, codes = load_real_returns(panel_path, e1.T_TRAIN * 2)
     e1.N_CAND = R_real.shape[1]
     e1.K_TRUE = args.k_true
     stats = describe(R_real)
 
     print(f"exp2 真实数据标定复核  v{VERSION}")
-    print(f"  数据：{PANEL.name}｜{R_real.shape[1]} 只 × {R_real.shape[0]} 个收益点（训练 {e1.T_TRAIN}／留出 {R_real.shape[0]-e1.T_TRAIN}）")
+    print(f"  数据：{panel_path.name}｜{R_real.shape[1]} 只 × {R_real.shape[0]} 个收益点（训练 {e1.T_TRAIN}／留出 {R_real.shape[0]-e1.T_TRAIN}）")
     print(f"  真实统计：日 sd={stats['sd']:.5f}｜偏度={stats['skew']:+.2f}｜峰度={stats['kurt']:.2f}"
           f"（正态=3）｜一阶自相关={stats['autocorr1']:+.3f}｜截面平均相关={stats['mean_cross_corr']:+.3f}")
     print(f"  真信号 {args.k_true}/{R_real.shape[1]} → 注入 α ∈ {args.alphas}"
@@ -197,7 +206,7 @@ def main() -> int:
               f" hit={b['hit_rate']:.3f} abstain={b['abstain_rate']:.3f}")
 
     payload = {"version": VERSION, "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
-               "panel": PANEL.name, "panel_stats": stats,
+               "panel": panel_path.name, "panel_stats": stats,
                "n_assets": int(R_real.shape[1]), "t_total": int(R_real.shape[0]),
                "k_true": args.k_true, "reps": args.reps,
                "alpha_mode": args.alpha_mode, "panel_kind": args.panel_kind,
