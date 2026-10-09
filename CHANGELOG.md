@@ -4,6 +4,10 @@
 
 ## [2.2.1] — 2026-10-06
 
+### Paper
+- ★ **预印本上线：arXiv:[2610.07701](https://arxiv.org/abs/2610.07701)**（v1，Submitted 2026-10-06；cs.AI 主分类 / cs.CE 交叉；DOI `10.48550/arXiv.2610.07701`）。仓库与论文的双向引用已通：
+  论文 Comments 字段指向本仓库，本仓库 README 与 `CITATION.cff` 指向论文。
+
 ### Added
 - **`paper/`** —— 论文《On the Boundary of Admission Gates: An Injected-Truth Study of
   Falsification-First Selection in Quantitative Strategy Research》全文：
