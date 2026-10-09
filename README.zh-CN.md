@@ -6,7 +6,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
 [![Version](https://img.shields.io/badge/version-2.2.1-informational.svg)](VERSION)
-[![Paper](https://img.shields.io/badge/paper-PDF%20%2812pp%29-b31b1b.svg)](paper/paper.pdf)
+[![arXiv](https://img.shields.io/badge/arXiv-2610.07701-b31b1b.svg)](https://arxiv.org/abs/2610.07701)
+[![Paper](https://img.shields.io/badge/paper-PDF%20%2812pp%29-lightgrey.svg)](paper/paper.pdf)
 
 [English](README.md) · [复现产物](experiments/) · [论文源码](paper/)
 
@@ -16,9 +17,9 @@
 
 ### 《准入闸门的有效性边界：一项基于注入式真值与真实数据标定的实证研究》
 
-**郑天伦**（复旦大学）· 2026 · 12 页（英文正文）
+**郑天伦**（复旦大学）· 2026 · 12 页（英文正文）· **arXiv:[2610.07701](https://arxiv.org/abs/2610.07701)** [cs.AI；cs.CE]
 
-📕 **[阅读 PDF](paper/paper.pdf)** ｜ 📝 [LaTeX 源码](paper/paper.tex) ｜
+🔗 **[arXiv:2610.07701](https://arxiv.org/abs/2610.07701)** ｜ 📕 **[阅读 PDF](paper/paper.pdf)** ｜ 📝 [LaTeX 源码](paper/paper.tex) ｜
 🔍 [投稿前形式审查](paper/review_checklist.md) ｜ 🧪 [实验](experiments/)
 
 **问题**：任何「会采纳结论」的自动化研究流程，都必须决定**何时不再相信自己的输出**。
@@ -38,16 +39,18 @@
 
 ```bibtex
 @article{zheng2026admissiongates,
-  title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
-            Falsification-First Selection in Quantitative Strategy Research},
-  author = {Zheng, Tianlun},
-  year   = {2026},
-  note   = {Preprint. Code and data: \url{https://github.com/simplify23/quant-trading-agent}}
+  title         = {On the Boundary of Admission Gates: An Injected-Truth Study of
+                   Falsification-First Selection in Quantitative Strategy Research},
+  author        = {Zheng, Tianlun},
+  year          = {2026},
+  eprint        = {2610.07701},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2610.07701},
+  url           = {https://arxiv.org/abs/2610.07701}
 }
 ```
 
-> arXiv 链接**待回填**——`CITATION.cff` 与本节的编号将在预印本上线后补齐。
-> 在此之前刻意留空：**宁可暂时没有链接，也不写一个假链接。**
 
 ---
 

@@ -7,7 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](https://www.python.org/)
 [![Version](https://img.shields.io/badge/version-2.2.1-informational.svg)](VERSION)
-[![Paper](https://img.shields.io/badge/paper-PDF%20%2812pp%29-b31b1b.svg)](paper/paper.pdf)
+[![arXiv](https://img.shields.io/badge/arXiv-2610.07701-b31b1b.svg)](https://arxiv.org/abs/2610.07701)
+[![Paper](https://img.shields.io/badge/paper-PDF%20%2812pp%29-lightgrey.svg)](paper/paper.pdf)
 [![Self-tests](https://img.shields.io/badge/self--tests-88%20passing-brightgreen.svg)](scripts/selftest_all.py)
 
 [中文说明](README.zh-CN.md) · [Reproduction artefacts](experiments/) · [Paper source](paper/)
@@ -18,9 +19,9 @@
 
 ### On the Boundary of Admission Gates: An Injected-Truth Study of Falsification-First Selection in Quantitative Strategy Research
 
-**Tianlun Zheng** (Fudan University) · 2026 · 12 pages
+**Tianlun Zheng** (Fudan University) · 2026 · 12 pages · **arXiv:[2610.07701](https://arxiv.org/abs/2610.07701)** [cs.AI; cs.CE]
 
-📕 **[Read the PDF](paper/paper.pdf)** ｜ 📝 [LaTeX source](paper/paper.tex) ｜
+🔗 **[arXiv:2610.07701](https://arxiv.org/abs/2610.07701)** ｜ 📕 **[Read the PDF](paper/paper.pdf)** ｜ 📝 [LaTeX source](paper/paper.tex) ｜
 🔍 [Pre-submission audit](paper/review_checklist.md) ｜ 🧪 [Experiments](experiments/)
 
 **The question.** Every automated research pipeline that admits conclusions must decide
@@ -44,16 +45,18 @@ discard real findings. **Neither failure is visible from the outside.**
 
 ```bibtex
 @article{zheng2026admissiongates,
-  title  = {On the Boundary of Admission Gates: An Injected-Truth Study of
-            Falsification-First Selection in Quantitative Strategy Research},
-  author = {Zheng, Tianlun},
-  year   = {2026},
-  note   = {Preprint. Code and data: \url{https://github.com/simplify23/quant-trading-agent}}
+  title         = {On the Boundary of Admission Gates: An Injected-Truth Study of
+                   Falsification-First Selection in Quantitative Strategy Research},
+  author        = {Zheng, Tianlun},
+  year          = {2026},
+  eprint        = {2610.07701},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2610.07701},
+  url           = {https://arxiv.org/abs/2610.07701}
 }
 ```
 
-> arXiv link **pending** — the identifiers in `CITATION.cff` and this section will be filled in
-> once the preprint is online. We deliberately leave them empty rather than publish a dead link.
 
 ---
 

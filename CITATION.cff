@@ -43,11 +43,6 @@ preferred-citation:
       given-names: "Tianlun"
       affiliation: "Fudan University"
   year: 2026
-  # ---------------------------------------------------------------------------
-  # ★ 待回填（arXiv 上传后）：
-  #   1) 取消下面两行的注释，并把 <arXiv-ID> 换成真实编号（如 2610.12345）
-  #   2) 同时更新 README.md 的 Paper 区块与 paper/arxiv_metadata.md
-  #   doi: "10.48550/arXiv.<arXiv-ID>"
-  #   url: "https://arxiv.org/abs/<arXiv-ID>"
-  #   ★ 在拿到真实编号之前刻意留空：宁可暂时没有 DOI，也不要写一个假链接。
-  # ---------------------------------------------------------------------------
+  doi: "10.48550/arXiv.2610.07701"
+  url: "https://arxiv.org/abs/2610.07701"
+  # arXiv: 2610.07701 (cs.AI primary; cs.CE cross-list), submitted 2026-10-06
