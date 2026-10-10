@@ -71,3 +71,22 @@
 
 ★ **未发布的东西不写在这里**。本文件只记录**已经进了仓库**的变更；
 进行中的实验、待回填的 arXiv 编号等在 `README.md` 与 `paper/arxiv_metadata.md` 中显式标注为「待办」。
+
+## v2.3 (2026-10-10)
+
+### Added
+- `references/masters.md`: M-1~M-12 rules distilled from Simons, Thorp, López de Prado, and top Chinese quant funds
+- `references/selfiter.md`: RSI three-channel self-learning protocol (linguistic/procedural/structural + Channel D external evolution)
+- `scripts/masters_checklist.py`: M-series soft checker with --selftest (PASS/WARN/MISS/FAIL, not counted in hard gates)
+- "Never Satisfied" meta-rule at top of SKILL.md: on convergence/monthly/on-demand, search externally for superior skills/frameworks
+
+### Changed
+- SKILL.md version bumped to v2.3
+- All selftests pass (qta_loop 40/40, preflight 25/25, masters_checklist good/bad samples)
+
+### Lessons encoded
+- M-1: Data hygiene (convertible bond close=0 incident, 2026-10-09)
+- M-4: Kelly criterion + half-Kelly sizing (S3 worst5 -54%, individual investor cannot replicate)
+- M-7: Meta-labelling / ranking key (PB percentile ordering = de Prado meta-labelling)
+- M-9: Crowding self-assessment (2024-02 CSI microcap liquidity collapse, 2025-07 momentum factor crash)
+- Temporal aggregation mismatch: signal-level +2.7pp ≠ portfolio-level (72-cell experiment, 2026-10-09)

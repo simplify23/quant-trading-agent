@@ -1,8 +1,8 @@
 ---
 name: quant-trading-agent
 display_name: 量化交易Agent策略框架
-display_name_en: Quant Trading Agent Framework (Triad Loop × Forward-First Audit × Preflight)
-version: 2.2.1
+display_name_en: Quant Trading Agent Framework v2.3 (Triad Loop × Admission Gates × M-Series Masters Rules × RSI Self-Learning)
+version: 2.3.0
 author: simplify23
 description: 量化交易 Agent 策略框架 v2.1 —— 把「三方闭环迭代」「前向优先反自欺审计」「上线前代码审计」合成一条可执行流水线。正方（探索 / 代码优化实现者）· 反方（政委：风险登记 + 优化处方四件套）· 中立裁判（独立取证 + G1–G9/F0–F6/D0–D4 逐条裁定 + 派工 + ★催办正方去做代码优化）。当用户说「跑一轮三方」「三方裁决」「让框架推进迭代」「催正方去改代码」「反方给优化处方」「策略该不该采纳并继续深挖」「这个结论凭什么算数」「我能测出来吗」「研究收敛了吗」「还能不能再优化」「已证伪的有哪些」「哪些结论经得起实盘」时使用；也用于「上线/实盘/影子盘前审一下代码有没有 bug」「这份代码能不能接钱」「审计一下会不会重复下单/写坏台账」。
 description_en: A triad closed-loop research framework for quantitative strategies — proponent (exploration / code-level optimization) × adversary (risk register + executable optimization prescriptions) × neutral judge (independent re-runs + G1–G9 admission gates, F0–F6 forward-first anti-self-deception audit, D0–D4 pre-deployment code audit with a SHA256 code fingerprint that binds the audit to the exact build). Use it for "run a triad round", "should we adopt this strategy", "is this backtest conclusion trustworthy", "can this effect even be detected" (N* sample-size arithmetic, moving-block CI, diff-trade audit, leave-one-out), "audit this code before going live or paper trading", "which conclusions were already falsified". Enforces — no adoption before sample size reaches N*; "not detected" is never reported as "invalid"; the adversary must deliver executable prescriptions, not just objections; the judge must coach the proponent until code-level optimizations actually land; passing an audit is not the same as being bug-free.
@@ -10,7 +10,12 @@ tags: [量化, 三方裁决, agent框架, 前向验证, 多重检验, 闭环迭�
 agent_created: true
 ---
 
-# 量化交易Agent策略框架 v2.1
+> ★ **永不自满元规则**（2026-10-10 用户指令）：本框架永远不是最优的。**每次收敛四闸触发、
+> 每月例行、或用户要求时**，必须先按 `references/selfiter.md` **通道 D** 去 WebSearch 外部优秀
+> 技能/框架/大师分享，模仿、翻译成可检查规则或脚本、演化进本框架——再谈下一步。
+> （先例：2026-10-10 M-1~M-12 即由此而来。）
+
+# 量化交易Agent策略框架 v2.3
 
 > **一句话**：**判决不是终点，下一轮才是。** 裁判必须把活派下去、并盯着正方把代码改完；
 > 反方必须既看住风险、又交出「怎么改」的处方；任何结论进台账之前，先过一遍「你能测出来吗」；
@@ -29,7 +34,8 @@ agent_created: true
 | — | `quant-agent-framework` 3.0（开发线） | 判决书携带「下一轮指令」的三方闭环 | 派了工但**不催**；反方只反对、**不给怎么改** |
 | **2.0** | 本框架 | 合并上述全部，补上【裁判催办】与【反方政委包】两条硬契约 | 只管研究结论，不管代码能不能接钱 |
 | **2.1** | 本框架 | 再加 **D0–D4 部署审计**（上线/实盘/影子盘前的代码 bug 闸门 + 代码指纹防「审完又改」） | 判据只有 DSR 一项多重检验校正；无「新增量」闸 |
-| **2.2** | **本框架（现役）** | 再加 **四项度量升级**：G9 拆 **G9a/b/c**（DSR + PBO + SPA）｜**G10 新增量闸**（与已采纳结论 ρ≤0.5）｜**G11 面板 IC**（t_adj≥2）｜**P9 claim↔diff 绑定** | — |
+| **2.2** | （已并入 v2.3） | 再加 **四项度量升级**：G9 拆 **G9a/b/c**（DSR + PBO + SPA）｜**G10 新增量闸**（与已采纳结论 ρ≤0.5）｜**G11 面板 IC**（t_adj≥2）｜**P9 claim↔diff 绑定** | — |
+| **2.3** | **本框架（现役）** | 再加 **M 系列大师规则**（M-1~M-12，来自 Simons/Thorp/de Prado/国内头部，软检查不计硬闸）＋ **RSI 三通道自学习协议**（语言/过程/结构/外部演化）＋ **masters_checklist.py** 软检查器 ＋ **永不自满元规则**（收敛/每月/用户要求 ⇒ 外部搜索→模仿→翻译→演化） | — |
 
 **v2.2 的四项升级各来自哪里**（不是自创口号，每条都有出处）：
 - **G9b/G9c（PBO/SPA）** ← MinervaScore 把 DSR+PBO+SPA 组合成分级的做法；本项目 `ar_judge.py` 早有实现，此前**没接进闸门**。
@@ -170,9 +176,17 @@ $PY $D/scripts/preflight_audit.py --mode live --targets <代码路径…> \
 - `references/forward-first.md` 前向优先手册（六道闸门 + 18 个踩坑 + 十一条不许）
 - `references/preflight-audit.md` ★上线前代码审计：规则表 + **自动化查不到什么** + 上线前必答清单
 - `references/precedent.md` 先例案卷 P-01…P-38（接入新项目前先对表）
+- `references/masters.md` ★ M 系列规则（大师经验→框架软检查 12 条，2026-10-10 新增）
+- `references/selfiter.md` ★ 自学习流程协议 v1.1（RSI 三通道：语言/过程/结构演化，2026-10-10 新增）
+- `references/masters.md` ★ M 系列规则（大师经验→框架软检查 12 条，2026-10-10 新增）
+- `references/selfiter.md` ★ 自学习流程协议 v1.1（RSI 三通道：语言/过程/结构演化，2026-10-10 新增）
 - `scripts/qta_loop.py` 主引擎（裁决 + 派工 + 催办 + 部署审计 + 收敛 + 自检，纯标准库）
 - `scripts/preflight_audit.py` ★代码审计器（静态扫描 P0/P1/P2 + 代码指纹 + `.preflightignore`）
 - `scripts/overfit_metrics.py` ★多重检验度量（**PBO / CSCV + Hansen SPA**，纯标准库，白噪声校准）
 - `scripts/fps_factor.py` 稳健度因子（N\* / moving-block CI / sign-flip / 选择自由度 / FPS）
 - `scripts/selftest_all.py` 一键自检（引擎 + 审计 + 度量 + 因子）
+- `scripts/masters_checklist.py` ★ M 系列软检查器（M-1~M-12 PASS/WARN/MISS，--selftest；不计硬闸，作裁判人工审阅附件）
+- `references/selfiter.md` 协议要点：失败→三元组入 precedent（语言）；手工动作≥2次⇒固化为脚本（过程）；同类问题≥2轮⇒允许改协议（结构）；结构突变每季度复盘防规则通胀
+- `scripts/masters_checklist.py` ★ M 系列软检查器（M-1~M-12 PASS/WARN/MISS，--selftest；不计硬闸，作裁判人工审阅附件）
+- `references/selfiter.md` 协议要点：失败→三元组入 precedent（语言）；手工动作≥2次⇒固化为脚本（过程）；同类问题≥2轮⇒允许改协议（结构）；结构突变每季度复盘防规则通胀
 - `examples/` 合规、驳回、违规三类 round.json（selftest 之外的第二层自证）
