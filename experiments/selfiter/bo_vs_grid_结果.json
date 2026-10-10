@@ -1,0 +1,490 @@
+{
+ "grid_best": {
+  "r1": -8.0,
+  "pb_win": 250.0,
+  "pb_gate": null,
+  "hold": 40,
+  "tr_calmar": 1.04,
+  "tr_ann": 0.2846,
+  "tr_mdd": -0.2736,
+  "tr_sharpe": 0.979,
+  "va": {
+   "ann": 0.1881,
+   "mdd": -0.29,
+   "sharpe": 0.485,
+   "calmar": 0.648
+  }
+ },
+ "grid_n": 72,
+ "bo_best": {
+  "params": {
+   "r1": -5.8,
+   "pb_win": 610.0,
+   "pb_gate": 0.7
+  },
+  "hold": 40,
+  "calmar": 0.62,
+  "ann": 0.1836,
+  "mdd": -0.2962,
+  "sharpe": 0.808,
+  "va_calmar": 0.601,
+  "va_ann": 0.1526,
+  "va_mdd": -0.2538,
+  "full_params": {
+   "r1": -5.8,
+   "pb_win": 610.0,
+   "pb_gate": 0.7,
+   "hold": 40
+  },
+  "trial": 13
+ },
+ "bo_n": 20,
+ "bo_history": [
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 583.0,
+    "pb_gate": 0.71
+   },
+   "hold": 43,
+   "calmar": 0.585,
+   "ann": 0.1763,
+   "mdd": -0.3013,
+   "sharpe": 0.774,
+   "va_calmar": 0.742,
+   "va_ann": 0.1874,
+   "va_mdd": -0.2526,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 583.0,
+    "pb_gate": 0.71,
+    "hold": 43
+   },
+   "trial": 1
+  },
+  {
+   "params": {
+    "r1": -11.2,
+    "pb_win": 1173.0,
+    "pb_gate": 0.64
+   },
+   "hold": 48,
+   "calmar": 0.418,
+   "ann": 0.106,
+   "mdd": -0.2534,
+   "sharpe": 0.357,
+   "va_calmar": 0.135,
+   "va_ann": 0.0549,
+   "va_mdd": -0.4068,
+   "full_params": {
+    "r1": -11.2,
+    "pb_win": 1173.0,
+    "pb_gate": 0.64,
+    "hold": 48
+   },
+   "trial": 2
+  },
+  {
+   "params": {
+    "r1": -11.0,
+    "pb_win": 595.0,
+    "pb_gate": 0.39
+   },
+   "hold": 55,
+   "calmar": 0.161,
+   "ann": 0.0561,
+   "mdd": -0.3497,
+   "sharpe": 0.156,
+   "va_calmar": 0.294,
+   "va_ann": 0.0989,
+   "va_mdd": -0.3366,
+   "full_params": {
+    "r1": -11.0,
+    "pb_win": 595.0,
+    "pb_gate": 0.39,
+    "hold": 55
+   },
+   "trial": 3
+  },
+  {
+   "params": {
+    "r1": -6.8,
+    "pb_win": 1005.0,
+    "pb_gate": 0.44
+   },
+   "hold": 17,
+   "calmar": 0.079,
+   "ann": 0.0292,
+   "mdd": -0.3725,
+   "sharpe": 0.058,
+   "va_calmar": 0.427,
+   "va_ann": 0.1191,
+   "va_mdd": -0.2786,
+   "full_params": {
+    "r1": -6.8,
+    "pb_win": 1005.0,
+    "pb_gate": 0.44,
+    "hold": 17
+   },
+   "trial": 4
+  },
+  {
+   "params": {
+    "r1": -7.6,
+    "pb_win": 170.0,
+    "pb_gate": 0.69
+   },
+   "hold": 39,
+   "calmar": 0.48,
+   "ann": 0.1476,
+   "mdd": -0.3076,
+   "sharpe": 0.555,
+   "va_calmar": 0.87,
+   "va_ann": 0.2482,
+   "va_mdd": -0.2852,
+   "full_params": {
+    "r1": -7.6,
+    "pb_win": 170.0,
+    "pb_gate": 0.69,
+    "hold": 39
+   },
+   "trial": 5
+  },
+  {
+   "params": {
+    "r1": -5.7,
+    "pb_win": 582.0,
+    "pb_gate": 0.71
+   },
+   "hold": 42,
+   "calmar": 0.581,
+   "ann": 0.1755,
+   "mdd": -0.3022,
+   "sharpe": 0.773,
+   "va_calmar": 0.681,
+   "va_ann": 0.1716,
+   "va_mdd": -0.2519,
+   "full_params": {
+    "r1": -5.7,
+    "pb_win": 582.0,
+    "pb_gate": 0.71,
+    "hold": 42
+   },
+   "trial": 6
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 7
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 608.0,
+    "pb_gate": 0.7
+   },
+   "hold": 41,
+   "calmar": 0.601,
+   "ann": 0.18,
+   "mdd": -0.2996,
+   "sharpe": 0.791,
+   "va_calmar": 0.598,
+   "va_ann": 0.1521,
+   "va_mdd": -0.2542,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 608.0,
+    "pb_gate": 0.7,
+    "hold": 41
+   },
+   "trial": 8
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7
+   },
+   "hold": 41,
+   "calmar": 0.602,
+   "ann": 0.1802,
+   "mdd": -0.2996,
+   "sharpe": 0.792,
+   "va_calmar": 0.595,
+   "va_ann": 0.1514,
+   "va_mdd": -0.2542,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7,
+    "hold": 41
+   },
+   "trial": 9
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 10
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 41,
+   "calmar": 0.601,
+   "ann": 0.1801,
+   "mdd": -0.2996,
+   "sharpe": 0.792,
+   "va_calmar": 0.597,
+   "va_ann": 0.1517,
+   "va_mdd": -0.2542,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 41
+   },
+   "trial": 11
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7
+   },
+   "hold": 41,
+   "calmar": 0.602,
+   "ann": 0.1802,
+   "mdd": -0.2996,
+   "sharpe": 0.792,
+   "va_calmar": 0.595,
+   "va_ann": 0.1514,
+   "va_mdd": -0.2542,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7,
+    "hold": 41
+   },
+   "trial": 12
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7
+   },
+   "hold": 40,
+   "calmar": 0.62,
+   "ann": 0.1836,
+   "mdd": -0.2962,
+   "sharpe": 0.808,
+   "va_calmar": 0.601,
+   "va_ann": 0.1526,
+   "va_mdd": -0.2538,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7,
+    "hold": 40
+   },
+   "trial": 13
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 14
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 15
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 16
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 17
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.604,
+   "ann": 0.1807,
+   "mdd": -0.2992,
+   "sharpe": 0.795,
+   "va_calmar": 0.611,
+   "va_ann": 0.1549,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 18
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.603,
+   "ann": 0.1805,
+   "mdd": -0.2992,
+   "sharpe": 0.794,
+   "va_calmar": 0.612,
+   "va_ann": 0.1552,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 609.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 19
+  },
+  {
+   "params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7
+   },
+   "hold": 42,
+   "calmar": 0.604,
+   "ann": 0.1807,
+   "mdd": -0.2992,
+   "sharpe": 0.795,
+   "va_calmar": 0.611,
+   "va_ann": 0.1549,
+   "va_mdd": -0.2537,
+   "full_params": {
+    "r1": -5.8,
+    "pb_win": 610.0,
+    "pb_gate": 0.7,
+    "hold": 42
+   },
+   "trial": 20
+  }
+ ],
+ "bo_reach_90pct_grid": null,
+ "comparison": {
+  "grid_calmar": 1.04,
+  "bo_calmar": 0.62,
+  "bo_efficiency": "20 trials vs 72 trials"
+ }
+}
